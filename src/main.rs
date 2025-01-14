@@ -1,0 +1,65 @@
+//#![windows_subsystem = "windows"]
+use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_disk_storage, get_ip_local,time_now};
+
+use crate::mangodb_connect::{mongodb};
+use tokio::time::{sleep, Duration, Instant};
+
+mod getinfo;
+mod mangodb_connect;
+
+#[tokio::main]
+async fn main() {
+    let mut last_mongodb_call = Instant::now();
+
+    let disk = get_ip_local();
+
+    println!("teste teste {}", disk);
+
+    let mongodb_interval = Duration::from_secs(10);
+
+    loop {
+        let now = Instant::now();
+
+        if now.duration_since(last_mongodb_call) >= mongodb_interval {
+            get_onlinetime();
+            let serialnumber = get_serialnumber();
+            let nomepc = get_namepc();
+            let username = get_username();
+            let disk = get_disks();
+            let ram = get_total_ram();
+            let model = get_model();
+            let ip = get_ip_local();
+            let processador = get_processador();
+            let version = get_windows_version();
+            let mut monitor = get_monitor();
+            let mut smodel = get_serialnumbermonitor();
+            let time = time_now();
+
+            if smodel == "" && monitor == "" {
+                smodel = "Sem Monitor".to_string();
+                monitor = "Sem Monitor".to_string();
+            }
+
+            mongodb(
+                serialnumber,
+                nomepc.clone(),
+                username,
+                disk,
+                ram,
+                model,
+                version,
+                ip,
+                processador,
+                monitor,
+                smodel,
+                time,
+            )
+                .await
+                .expect("Erro ao chamar MongoDB");
+
+            last_mongodb_call = now;
+        }
+
+        sleep(Duration::from_secs(5)).await;
+    }
+}
