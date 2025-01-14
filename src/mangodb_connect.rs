@@ -4,18 +4,17 @@ use serde::Serialize;
 #[derive(Serialize)]
 struct Infos {
     nome: String,
+    nomeusuario : String,
     servicetag: String,
     modelo: String,
     versao: String,
     ip: String,
-    nomeusuario : String,
     disco: String,
     processador: String,
     ram: String,
     monitor: String,
     snmonitor: String,
     time: String
-
 }
 
 pub async fn mongodb(
@@ -47,11 +46,11 @@ pub async fn mongodb(
     // Criar um novo usuário
     let pcinfos = Infos {
         nome: namepc.clone(),
+        nomeusuario: username.clone(),
         servicetag: serial.clone(),
         modelo: model.clone(),
         versao: versao.clone(),
         ip: ip.clone(),
-        nomeusuario: username.clone(),
         disco: disk.clone(),
         processador: process.clone(),
         ram: rampc.clone(),
@@ -74,11 +73,11 @@ pub async fn mongodb(
         let update = doc! {
             "$set": {
                 "nome": namepc,
+                "nomeusuario": username,
                 "servicetag": serial,
                 "modelo": model,
                 "versao": versao,
                 "ip": ip,
-                "nomeusuario": username,
                 "disco": disk,
                 "processador": process,
                 "ram": rampc,
