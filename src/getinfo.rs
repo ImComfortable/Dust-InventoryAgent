@@ -1,4 +1,3 @@
-use std::io::BufRead;
 use hostname::get as get_hostname;
 use winapi::um::winbase::CREATE_NO_WINDOW;
 use tokio::time::{Duration};
@@ -7,7 +6,6 @@ use std::os::windows::process::CommandExt;
 use std::thread;
 use regex::Regex;
 use chrono::Local;
-use windows::Win32::System::SystemInformation::{GetVersion, OSVERSIONINFOW};
 
 pub fn get_serialnumber() -> String {
     let servicetag = Command::new("powershell")

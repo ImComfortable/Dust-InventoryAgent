@@ -1,5 +1,5 @@
 //#![windows_subsystem = "windows"]
-use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_disk_storage, get_ip_local,time_now};
+use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_ip_local,time_now};
 
 use crate::mangodb_connect::{mongodb};
 use tokio::time::{sleep, Duration, Instant};
@@ -10,10 +10,6 @@ mod mangodb_connect;
 #[tokio::main]
 async fn main() {
     let mut last_mongodb_call = Instant::now();
-
-    let disk = get_ip_local();
-
-    println!("teste teste {}", disk);
 
     let mongodb_interval = Duration::from_secs(10);
 
