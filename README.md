@@ -1,5 +1,16 @@
 Initial readme file, only for setup.
 
+
+Agent features:
+
+- Get some features from computer: Hostname, User, ServiceTag(Dell only), Model, Version, IP, Disk Type, CPU, RAM, Monitor, ServiceTagMonitor(Dell Only) and last verfication time
+- Power Off Computer if it's online for more three days
+
+Features to think:
+
+- Execute commands with cmd or powershell, i already make a prototype of this, but it's very unsafe and "amateur" to implement
+- Send warnings to us, about hardware and peripherals changes, for example keyboard swap or hdd changes
+
 To do:
 
 - [ ] Optimize the agent for every task
