@@ -7,3 +7,8 @@ To do:
 - [ ] Create a login system for website with jws token
 - [ ] Think about new info collections features for agent
 - [ ] Test the agent in production, on a windows 10 and 11 Pcs
+
+
+Server Things
+
+- [ ] Configure the MongoDb, add an user and password for authentication
