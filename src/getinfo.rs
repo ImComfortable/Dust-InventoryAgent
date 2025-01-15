@@ -274,7 +274,7 @@ pub fn get_disk_storage() -> String {
             let snoutput_result_limited = snoutput_result.chars().take(3).collect::<String>();
             snoutput_result_limited.trim().to_string()
         }
-        Err(_) => "Error ao coletar a service tag".to_string()
+        Err(_) => "Error ao coletar o espaço do disco".to_string()
     }
 }
 pub fn get_ip_local() -> String {

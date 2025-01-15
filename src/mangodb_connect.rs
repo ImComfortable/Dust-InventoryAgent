@@ -31,7 +31,7 @@ pub async fn mongodb(
     smonitor: String,
     time: String,
 ) -> Result<(), mongodb::error::Error> {
-    let uri = "mongodb://localhost:27017";
+    let uri = "mongodb://192.168.1.99:27017";
 
     // Configurar opções do cliente
     let client_options = ClientOptions::parse(uri).await?;
