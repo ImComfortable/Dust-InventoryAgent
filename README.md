@@ -13,7 +13,7 @@ Features to think:
 
 To do:
 
-- [ ] Optimize the agent for every task
+- [X] Optimize the agent for every task
 - [ ] Make a website for informations, to make my life more easy
 - [ ] Create a login system for website with jws token
 - [ ] Think about new info collections features for agent
