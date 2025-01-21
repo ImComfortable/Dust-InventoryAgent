@@ -6,7 +6,7 @@ const port = 3000;
 
 app.use(express.json());
 
-mongoose.connect('mongodb://agent:JolyneTheCat%211202%2E07@192.168.1.99:27017/InfosPC?authSource=InfosPC', {
+mongoose.connect('mongodb://localhost:27017/InfosPC', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
@@ -14,10 +14,12 @@ mongoose.connect('mongodb://agent:JolyneTheCat%211202%2E07@192.168.1.99:27017/In
    .catch((err) => console.error('Error ao conectar ao mongo', err));
 
 app.post('/dbinfos', async (req, res) => {
-    const { nome, username, servicetag , modelo, versao} = req.body;
+    const { nome, nomeusuario, servicetag , modelo, versao} = req.body;
+    console.log(nome, nomeusuario, servicetag, modelo, versao);
    
     try {
-        const newinfo = new Infos({ nome, username, servicetag, modelo, versao});
+        const newinfo = new Infos({ nome, nomeusuario, servicetag, modelo, versao});
+        console.log(newinfo)
         await newinfo.save();
         res.status(201).json(newinfo);
     } catch (err) {

@@ -54,11 +54,15 @@ pub async fn sendinfos(
         .json(&info)
         .send()
         .await?;
+
+    let status = res.status();  
+    let body = res.text().await?;  
     
-    if res.status().is_success() {
+    if status.is_success() {
         println!("Sucesso ao mandar as infos para a API");
     }  else {
-        println!("Erro ao mandar as infos para a API {:?}", res.status());
+        println!("Erro ao mandar as infos para a API {:?}", status);
+        println!("Corpo da resposta de erro {}", &body);
     }
 
     Ok(())
