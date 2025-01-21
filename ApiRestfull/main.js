@@ -6,7 +6,7 @@ const port = 3000;
 
 app.use(express.json());
 
-mongoose.connect('mongo', {
+mongoose.connect('mongodb://agent:JolyneTheCat%211202%2E07@192.168.1.99:27017/InfosPC?authSource=InfosPC', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })

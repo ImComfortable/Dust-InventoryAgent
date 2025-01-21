@@ -1,7 +1,7 @@
 //#![windows_subsystem = "windows"]
 use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_ip_local,time_now};
 
-use crate::mangodb_connect::{mongodb};
+use crate::mangodb_connect::{sendinfos};
 use tokio::time::{sleep, Duration, Instant};
 
 mod getinfo;
@@ -36,7 +36,7 @@ async fn main() {
                 monitor = "Sem Monitor".to_string();
             }
 
-            mongodb(
+            sendinfos(
                 serialnumber,
                 nomepc.clone(),
                 username,

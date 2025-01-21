@@ -5,9 +5,14 @@ const infoschema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    username: {
+    nomeusuario: {
         type: String,
         required: true,
+        validate: {
+            validator: function(value){
+            return value.toLowerCase() !== 'candeias';
+            },
+        },
     },
     servicetag: {
         type: String,
