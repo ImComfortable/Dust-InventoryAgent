@@ -22,4 +22,4 @@ To do:
 
 Server Things
 
-- [ ] Configure the MongoDb, add an user and password for authentication
+- [X] Configure the MongoDb, add an user and password for authentication
