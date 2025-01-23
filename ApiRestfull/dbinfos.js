@@ -25,7 +25,11 @@ const infoschema = new mongoose.Schema({
     },
     versao: {
         type: String,
-        required: true
+        required: true,
+    },
+    windows: {
+        type: String,
+        required: true,
     },
 });
 

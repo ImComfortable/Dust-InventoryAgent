@@ -13,20 +13,30 @@ mongoose.connect('mongodb://localhost:27017/InfosPC', {
    .then(() => console.log('Conectado ao Mongodb'))
    .catch((err) => console.error('Error ao conectar ao mongo', err));
 
-app.post('/dbinfos', async (req, res) => {
-    const { nome, nomeusuario, servicetag , modelo, versao} = req.body;
+
+   app.post('/dbinfos', async (req, res) => {
+    const { nome, nomeusuario, servicetag, modelo, versao, windows } = req.body;
     console.log(nome, nomeusuario, servicetag, modelo, versao);
-   
+
+    const infoexist = await Infos.findOne({ servicetag })
+
+    if (infoexist) {
+        return res.status(400).json("Sem alterações.")
+    }
+
+    const newinfo = new Infos({ nome, nomeusuario, servicetag, modelo, versao, windows });
+    console.log(newinfo);
+
     try {
-        const newinfo = new Infos({ nome, nomeusuario, servicetag, modelo, versao});
-        console.log(newinfo)
         await newinfo.save();
         res.status(201).json(newinfo);
     } catch (err) {
-        res.status(500).json({ message: 'Error ao subir as infos para a db'})
+        console.error(err);
+        res.status(500).json({ message: 'Erro ao salvar as informações.' });
     }
 });
 
+// Inicia o servidor
 app.listen(port, () => {
-    console.log(`Servidor rodando http://localhost:${port}`)
+    console.log(`Servidor rodando em http://localhost:${port}`);
 });

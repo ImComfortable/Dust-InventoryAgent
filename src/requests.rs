@@ -9,6 +9,7 @@ struct Infos {
     servicetag: String,
     modelo: String,
     versao: String,
+    windows: String,
     ip: String,
     disco: String,
     processador: String,
@@ -26,6 +27,7 @@ pub async fn sendinfos(
     rampc: String,
     model: String,
     versao: String,
+    windows: String,
     ip: String,
     process: String,
     tela: String,
@@ -39,6 +41,7 @@ pub async fn sendinfos(
         servicetag: serial,
         modelo: model,
         versao: versao,
+        windows: windows.clone(),
         ip: ip,
         disco: disk,
         processador: process,
@@ -49,6 +52,7 @@ pub async fn sendinfos(
     };
     
     let client = Client::new();
+    println!("{}", &windows);
 
     let res = client.post("http://localhost:3000/dbinfos")
         .json(&info)
@@ -56,13 +60,15 @@ pub async fn sendinfos(
         .await?;
 
     let status = res.status();  
-    let body = res.text().await?;  
+    //let body = res.text().await?;  
     
     if status.is_success() {
         println!("Sucesso ao mandar as infos para a API");
-    }  else {
-        println!("Erro ao mandar as infos para a API {:?}", status);
-        println!("Corpo da resposta de erro {}", &body);
+    } else if status == reqwest::StatusCode::BAD_REQUEST {
+        println!("Erro: Já existe um registro com esta servicetag.");
+    }
+    else {
+        println!("Sem alterações")
     }
 
     Ok(())

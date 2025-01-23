@@ -6,6 +6,9 @@ use std::os::windows::process::CommandExt;
 use std::thread;
 use regex::Regex;
 use chrono::Local;
+use wmi::{WMIConnection, COMLibrary};
+use std::error::Error;
+use std::collections::HashMap;
 
 pub fn get_serialnumber() -> String {
     let servicetag = Command::new("powershell")
@@ -295,4 +298,24 @@ pub fn get_ip_local() -> String {
 pub fn time_now() -> String {
     let agora = Local::now();
     agora.format("%Y-%m-%d %H:%M:%S").to_string() 
+}
+pub fn get_windows() -> String {
+    let model = Command::new("powershell")
+    .arg(r"Get-CimInstance SoftwareLicensingProduct -Filter 'Name like ''Windows%'' ' | where { $_.PartialProductKey } | select LicenseStatus")    
+        .creation_flags(CREATE_NO_WINDOW)
+        .output();
+
+    match model {
+        Ok(model) => {
+            let output = String::from_utf8_lossy(&model.stdout);
+            let saida = output.trim().to_string();
+            println!("{}", &saida);
+            if saida.contains("1") {
+                "Windows Ativo".to_string()
+            } else {
+                "Precisa ativar o windows".to_string()
+            }
+        }
+        Err(_) => "Error ao coletar o modelo do dispositivo".to_string()
+    }
 }

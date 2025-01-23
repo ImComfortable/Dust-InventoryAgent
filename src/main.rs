@@ -1,5 +1,5 @@
 //#![windows_subsystem = "windows"]
-use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_ip_local,time_now};
+use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_ip_local,time_now,get_windows};
 
 use crate::requests::{sendinfos};
 use tokio::time::{sleep, Duration, Instant};
@@ -18,6 +18,7 @@ async fn main() {
 
         if now.duration_since(last_mongodb_call) >= mongodb_interval {
             get_onlinetime();
+            let active = get_windows();
             let serialnumber = get_serialnumber();
             let nomepc = get_namepc();
             let username = get_username();
@@ -44,6 +45,7 @@ async fn main() {
                 ram,
                 model,
                 version,
+                active,
                 ip,
                 processador,
                 monitor,
