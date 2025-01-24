@@ -6,37 +6,52 @@ const port = 3000;
 
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/InfosPC', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect('mongodb://localhost:27017/InfosPC')
    .then(() => console.log('Conectado ao Mongodb'))
    .catch((err) => console.error('Error ao conectar ao mongo', err));
 
 
    app.post('/dbinfos', async (req, res) => {
-    const { nome, nomeusuario, servicetag, modelo, versao, windows } = req.body;
+    const { passwordpost, nome, 
+            nomeusuario, servicetag, modelo, versao, 
+            windows, ip, processador, monitor, snmonitor, time } = req.body;
+
+
     console.log(nome, nomeusuario, servicetag, modelo, versao);
 
-    const infoexist = await Infos.findOne({ servicetag })
-
-    if (infoexist) {
-        return res.status(400).json("Sem alterações.")
+    if (!passwordpost) {
+        return res.status(400).json("Password Invalid")
     }
 
-    const newinfo = new Infos({ nome, nomeusuario, servicetag, modelo, versao, windows });
-    console.log(newinfo);
+    if (passwordpost != "JolyneTheCat1202.07") {
+        return res.status(400).json("Incorrect Password")
+    }
 
     try {
-        await newinfo.save();
-        res.status(201).json(newinfo);
+        const infoexist = await Infos.findOne({ servicetag });
+
+        if (infoexist) {
+            const updateInfo = await Infos.findOneAndUpdate (
+                  { servicetag },
+                  { nome,nomeusuario, modelo, versao, 
+                  windows, ip, processador, monitor, snmonitor, time },
+                  { new: true }
+            );
+            return res.status(200).json(updateInfo);
+        }
+
+      const newinfo = new Infos({ nome,nomeusuario, servicetag, modelo, versao, 
+                                  windows, ip, processador, monitor, snmonitor, time });
+      await newinfo.save();
+      res.status(201).json(newinfo);  // Retorna o novo documento
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Erro ao salvar as informações.' });
-    }
+      console.error(err);
+      res.status(500).json({ message: 'Erro ao processar a requisição.' });
+}
+
 });
 
 // Inicia o servidor
 app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
+    console.log(`Servidor rodando em http://192.168.20.8:${port}`);
 });

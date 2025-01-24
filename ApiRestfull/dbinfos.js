@@ -31,6 +31,26 @@ const infoschema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    ip: {
+        type: String,
+        required: true,
+    },
+    processador: {
+        type: String,
+        required: true,
+    },
+    monitor: {
+        type: String,
+        required: true
+    },
+    snmonitor: {
+        type: String,
+        required: true
+    },
+    time: {
+        type: String,
+        required: true
+    },
 });
 
 const info = mongoose.model("infos", infoschema);

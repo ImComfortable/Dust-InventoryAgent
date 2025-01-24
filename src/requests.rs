@@ -16,7 +16,8 @@ struct Infos {
     ram: String,
     monitor: String,
     snmonitor: String,
-    time: String
+    time: String,
+    passwordpost: String,
 }
 
 pub async fn sendinfos(
@@ -41,7 +42,7 @@ pub async fn sendinfos(
         servicetag: serial,
         modelo: model,
         versao: versao,
-        windows: windows.clone(),
+        windows: windows,//.clone(),
         ip: ip,
         disco: disk,
         processador: process,
@@ -49,27 +50,31 @@ pub async fn sendinfos(
         monitor: tela,
         snmonitor: smonitor,
         time: time,
+        passwordpost: "JolyneTheCat1202.07".to_string()
     };
     
     let client = Client::new();
-    println!("{}", &windows);
+    //println!("{}", &windows);
 
-    let res = client.post("http://localhost:3000/dbinfos")
+    let res = client.post("http://192.168.20.8:3000/dbinfos")
         .json(&info)
         .send()
-        .await?;
+        .await;
 
-    let status = res.status();  
-    //let body = res.text().await?;  
-    
-    if status.is_success() {
-        println!("Sucesso ao mandar as infos para a API");
-    } else if status == reqwest::StatusCode::BAD_REQUEST {
-        println!("Erro: Já existe um registro com esta servicetag.");
-    }
-    else {
-        println!("Sem alterações")
-    }
+    match res {
+        Ok(response) => {
+            let status = response.status();
+
+            if status.is_success() {
+                println!("Sucesso ao enviar as infos para a api");
+            } else {
+                println!("Sem alterações, status {}", status);
+            }
+        },
+        Err(e) => {
+            println!("Erro ao enviar a requisição {}", e);
+        }
+    }   
 
     Ok(())
 }

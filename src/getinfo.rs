@@ -6,9 +6,6 @@ use std::os::windows::process::CommandExt;
 use std::thread;
 use regex::Regex;
 use chrono::Local;
-use wmi::{WMIConnection, COMLibrary};
-use std::error::Error;
-use std::collections::HashMap;
 
 pub fn get_serialnumber() -> String {
     let servicetag = Command::new("powershell")
@@ -309,7 +306,7 @@ pub fn get_windows() -> String {
         Ok(model) => {
             let output = String::from_utf8_lossy(&model.stdout);
             let saida = output.trim().to_string();
-            println!("{}", &saida);
+            //println!("{}", &saida);
             if saida.contains("1") {
                 "Windows Ativo".to_string()
             } else {
