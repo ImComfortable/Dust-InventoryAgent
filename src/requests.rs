@@ -21,19 +21,19 @@ struct Infos {
 }
 
 pub async fn sendinfos(
-    serial: String,
-    namepc: String,
-    username: String,
-    disk: String,
-    rampc: String,
-    model: String,
-    versao: String,
-    windows: String,
-    ip: String,
-    process: String,
-    tela: String,
-    smonitor: String,
-    time: String,
+       serial: String,
+       namepc: String,
+       username: String,
+       disk: String,
+       rampc: String,
+       model: String,
+       versao: String,
+       windows: String,
+       ip: String,
+       process: String,
+       tela: String,
+       smonitor: String,
+       time: String,
 ) -> Result<(), Box<dyn Error>>{
 
     let info = Infos{
@@ -68,7 +68,7 @@ pub async fn sendinfos(
             if status.is_success() {
                 println!("Sucesso ao enviar as infos para a api");
             } else {
-                println!("Sem alterações, status {}", status);
+                println!("Erro ao mandar as infos para a api, status {}", status);
             }
         },
         Err(e) => {

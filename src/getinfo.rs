@@ -294,7 +294,7 @@ pub fn get_ip_local() -> String {
 }
 pub fn time_now() -> String {
     let agora = Local::now();
-    agora.format("%Y-%m-%d %H:%M:%S").to_string() 
+    agora.format("%Y-%m-%d %H").to_string() 
 }
 pub fn get_windows() -> String {
     let model = Command::new("powershell")
