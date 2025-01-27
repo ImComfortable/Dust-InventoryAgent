@@ -1,10 +1,16 @@
 Initial readme file, only for setup.
 
 
-Agent features:
-
-- Get some informations from computer: Hostname, User, ServiceTag(Dell only), Model, Version, IP, Disk Type, CPU, RAM, Monitor, ServiceTagMonitor(Dell Only) and last verfication time
-- Power Off Computer if it's online for more three days
+# Agent features:
+-ServiceTag
+-Hostname
+-Actual User
+-Ip
+-Monitor
+-Service Tag PC and Monitor
+-Windows version
+-if windows is active or not
+-Power Off Computer if it's online for more three days
 
 Features to think:
 
@@ -14,9 +20,9 @@ Features to think:
 To do:
 
 - [X] Optimize the agent for every task
-- [ ] Make a website for informations, to make my life more easy
-- [ ] Create a login system for website with jws token
-- [ ] Think about new info collections features for agent
+- [X] Api Restfull
+- [ ] Website for informations, to make my life more easy
+- [ ] Login system for website with jws token
 - [ ] Test the agent in production, on a windows 10 and 11 Pcs
 
 
