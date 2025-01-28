@@ -12,7 +12,8 @@ pub fn get_serialnumber() -> String {
         .arg("/C")
         .arg("Get-Ciminstance Win32_Bios | Format-List Serialnumber")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match servicetag {
         Ok(servicetag) => {
@@ -36,7 +37,8 @@ pub fn get_serialnumbermonitor() -> String {
         $serialNumber
     }}"#)
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
     match monitor_serial {
         Ok(monitorserial) => {
             let outputpw = String::from_utf8_lossy(&monitorserial.stdout);
@@ -52,7 +54,8 @@ pub fn get_monitor() -> String {
             "Get-WmiObject WmiMonitorID -Namespace root\\wmi | ForEach-Object { [System.Text.Encoding]::ASCII.GetString($_.UserFriendlyName) }"
         ])
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
     match output {
         Ok(output) => {
             let outputstring = String::from_utf8_lossy(&output.stdout);
@@ -71,7 +74,8 @@ pub fn get_processador() -> String {
         .arg("/C")
         .arg("(Get-WmiObject Win32_Processor).Name")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match processador {
         Ok(processador) => {
@@ -92,7 +96,8 @@ pub fn get_model() -> String {
         .arg("/C")
         .arg("(Get-CimInstance -ClassName Win32_ComputerSystem).Model")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match model {
         Ok(model) => {
@@ -107,7 +112,8 @@ pub fn get_username() -> String {
         .arg("/C")
         .arg("whoami")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
     match username {
         Ok(username) => {
             let usernameout = String::from_utf8_lossy(&username.stdout);
@@ -123,7 +129,8 @@ pub fn get_disks() -> String {
         .arg("/C")
         .arg("Get-PhysicalDisk | Select-Object MediaType")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match disk {
         Ok(output) => {
@@ -147,7 +154,8 @@ pub fn get_total_ram() -> String {
         .arg("-Command")
         .arg("(Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match output {
         Ok(output) => {
@@ -198,7 +206,8 @@ pub fn get_onlinetime() {
     $days = (New-TimeSpan -Start $uptime -End (Get-Date)).Days
     $days")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match time {
         Ok(time) => {
@@ -244,7 +253,8 @@ pub fn get_windows_version() -> String {
         .arg("/C")
         .arg(format!("(Get-ComputerInfo).WindowsProductName + ' ' + (Get-ComputerInfo).WindowsCurrentVersion"))
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match output {
         Ok(output) => {
@@ -265,7 +275,8 @@ pub fn get_disk_storage() -> String {
         .arg("/C")
         .arg("Get-WmiObject -Class Win32_DiskDrive | Select-Object Size")
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match servicetag {
         Ok(servicetag) => {
@@ -283,7 +294,8 @@ pub fn get_ip_local() -> String {
         .arg(r#"(Get-NetIPAddress -InterfaceAlias "Ethernet" | Where-Object { $_.AddressFamily -eq "IPv4" }).IPAddress"#)
         .creation_flags(CREATE_NO_WINDOW)
         .output();
-        
+        .expect("Falha ao executar o comando");
+
     match ip {
         Ok(ip) => {
             let ipoutput = String::from_utf8_lossy(&ip.stdout);
@@ -300,7 +312,8 @@ pub fn get_windows() -> String {
     let model = Command::new("powershell")
     .arg(r"Get-CimInstance SoftwareLicensingProduct -Filter 'Name like ''Windows%'' ' | where { $_.PartialProductKey } | select LicenseStatus")    
         .creation_flags(CREATE_NO_WINDOW)
-        .output();
+        .output()
+        .expect("Falha ao executar o comando");
 
     match model {
         Ok(model) => {
@@ -313,6 +326,6 @@ pub fn get_windows() -> String {
                 "Precisa ativar o windows".to_string()
             }
         }
-        Err(_) => "Error ao coletar o modelo do dispositivo".to_string()
+        Err(_) => "Error ao identificar status da ativacao".to_string()
     }
 }
