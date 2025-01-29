@@ -1,4 +1,4 @@
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_ip_local,time_now,get_windows};
 
 use crate::requests::{sendinfos};
@@ -11,7 +11,7 @@ mod requests;
 async fn main() {
     let mut last_mongodb_call = Instant::now();
 
-    let mongodb_interval = Duration::from_secs(10);
+    let mongodb_interval = Duration::from_secs(1800);
 
     loop {
         let now = Instant::now();
