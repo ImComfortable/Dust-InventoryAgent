@@ -6,7 +6,7 @@ const port = 3000;
 
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/InfosPC')
+mongoose.connect('mongosh "mongodb://agent:JolyneTheCat120207@localhost:27017/InfosPC?authSource=admin"')
    .then(() => console.log('Conectado ao Mongodb'))
    .catch((err) => console.error('Error ao conectar ao mongo', err));
 
@@ -16,8 +16,6 @@ mongoose.connect('mongodb://localhost:27017/InfosPC')
             nomeusuario, servicetag, modelo, versao, 
             windows, ip, processador, monitor, snmonitor, time } = req.body;
 
-
-    console.log(nome, nomeusuario, servicetag, modelo, versao);
 
     if (!passwordpost) {
         return res.status(400).json("Password Invalid")

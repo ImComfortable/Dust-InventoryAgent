@@ -56,7 +56,7 @@ pub async fn sendinfos(
     let client = Client::new();
     //println!("{}", &windows);
 
-    let res = client.post("http://192.168.20.8:3000/dbinfos")
+    let res = client.post("http://192.168.1.99:3000/dbinfos")
         .json(&info)
         .send()
         .await;
