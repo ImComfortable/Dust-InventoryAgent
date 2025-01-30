@@ -3,13 +3,14 @@ Initial readme file, only for setup.
 
 # Agent features:
 - ServiceTag
-- Hostname
+- Pc Model
+- Hostname from computer
 - Actual User
 - Local IP(for now, only if computer is connect via cable)
-- Monitor
-- Service Tag PC and Monitor
+- Monitor Model
+- Service Tag  of PC and Monitor
 - Windows version
-- if windows is active or not
+- If windows is active
 - Power Off Computer if it's online for more three days
 
 # Features to think:
