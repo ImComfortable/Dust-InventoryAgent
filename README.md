@@ -14,8 +14,9 @@ Initial readme file, only for setup.
 
 # Features to think:
 
-- Execute commands with cmd or powershell, i already made a prototype of this, but it's very unsafe and "amateur" to implementention
+- Install and Uninstall programs with commands or options in agent site
 - Send warnings to us, about hardware and peripherals changes, for example keyboard swap or hdd changes
+- Audit system
 
 To do:
 
