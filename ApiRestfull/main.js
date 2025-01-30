@@ -6,47 +6,56 @@ const port = 3000;
 
 app.use(express.json());
 
-mongoose.connect('mongosh "mongodb://agent:JolyneTheCat120207@localhost:27017/InfosPC?authSource=admin"')
+mongoose.connect('mongodb://localhost:27017/InfosPC')
    .then(() => console.log('Conectado ao Mongodb'))
    .catch((err) => console.error('Error ao conectar ao mongo', err));
 
 
    app.post('/dbinfos', async (req, res) => {
-    const { passwordpost, nome, 
-            nomeusuario, servicetag, modelo, versao, 
-            windows, ip, processador, monitor, snmonitor, time } = req.body;
+    const data = Array.isArray(req.body) ? req.body : [req.body];
 
+    const responses = [];
 
-    if (!passwordpost) {
-        return res.status(400).json("Password Invalid")
-    }
+    for (const item of data) {
+        const { passwordpost, nome, nomeusuario, servicetag, modelo, versao, 
+                windows, ip, processador, monitor, snmonitor, time } = item;
 
-    if (passwordpost != "JolyneTheCat1202.07") {
-        return res.status(400).json("Incorrect Password")
-    }
-
-    try {
-        const infoexist = await Infos.findOne({ servicetag });
-
-        if (infoexist) {
-            const updateInfo = await Infos.findOneAndUpdate (
-                  { servicetag },
-                  { nome,nomeusuario, modelo, versao, 
-                  windows, ip, processador, monitor, snmonitor, time },
-                  { new: true }
-            );
-            return res.status(200).json(updateInfo);
+        if (!passwordpost) {
+            responses.push({ status: 400, message: "Password Invalid" });
+            continue;
         }
 
-      const newinfo = new Infos({ nome,nomeusuario, servicetag, modelo, versao, 
-                                  windows, ip, processador, monitor, snmonitor, time });
-      await newinfo.save();
-      res.status(201).json(newinfo);  // Retorna o novo documento
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Erro ao processar a requisição.' });
-}
+        if (passwordpost !== "JolyneTheCat1202.07") {
+            responses.push({ status: 400, message: "Incorrect Password" });
+            continue;
+        }
 
+        try {
+            const infoexist = await Infos.findOne({ servicetag });
+
+            if (infoexist) {
+                const updateInfo = await Infos.findOneAndUpdate(
+                    { servicetag },
+                    { nome, nomeusuario, modelo, versao, 
+                      windows, ip, processador, monitor, snmonitor, time },
+                    { new: true }
+                );
+                responses.push({ status: 200, data: updateInfo });
+            } else {
+                const newinfo = new Infos({
+                    nome, nomeusuario, servicetag, modelo, versao, 
+                    windows, ip, processador, monitor, snmonitor, time 
+                });
+                await newinfo.save();
+                responses.push({ status: 201, data: newinfo });
+            }
+        } catch (err) {
+            console.error(err);
+            responses.push({ status: 500, message: 'Erro ao processar a requisição.' });
+        }
+    }
+
+    res.status(200).json(responses);
 });
 
 // Inicia o servidor

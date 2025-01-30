@@ -23,7 +23,7 @@ pub fn get_serialnumber() -> String {
         Err(_) => "Error ao coletar a service tag".to_string()
     }
 }
-pub fn get_serialnumbermonitor() -> String {
+pub fn get_serialnumbermonitor() -> Option<String> {
     let monitor_serial = Command::new("powershell")
         .arg("-Command")
         .arg(r#"Get-WmiObject -Namespace root\wmi -Class WmiMonitorID | ForEach-Object {
@@ -40,12 +40,12 @@ pub fn get_serialnumbermonitor() -> String {
     match monitor_serial {
         Ok(monitorserial) => {
             let outputpw = String::from_utf8_lossy(&monitorserial.stdout);
-            outputpw.trim().to_string()
+            Some(outputpw.trim().to_string())
         }
-        Err(_) => "Error ao coletar o serial number do monitor".to_string()
+        Err(_) => Some("Error ao coletar o serial number do monitor".to_string())
     }
 }
-pub fn get_monitor() -> String {
+pub fn get_monitor() -> Option<String> {
     let output = Command::new("powershell")
         .args(&[
             "-Command",
@@ -61,9 +61,9 @@ pub fn get_monitor() -> String {
                 .filter(|c| !c.is_control())
                 .collect();
             let final_output = cleaned_output.trim().to_string();
-            final_output
+            Some(final_output)
         }
-        Err(_) => "Error ao coletar o monitor".to_string()
+        Err(_) => Some("Error ao coletar o monitor".to_string())
     }
 }
 pub fn get_processador() -> String {
@@ -294,7 +294,7 @@ pub fn get_ip_local() -> String {
 }
 pub fn time_now() -> String {
     let agora = Local::now();
-    agora.format("%Y-%m-%d %H").to_string() 
+    agora.format("%d-%m-%Y às %H horas.").to_string() 
 }
 pub fn get_windows() -> String {
     let model = Command::new("powershell")

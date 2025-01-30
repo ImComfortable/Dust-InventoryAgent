@@ -1,7 +1,6 @@
-#![windows_subsystem = "windows"]
-use crate::getinfo::{get_namepc, get_serialnumber, get_username, get_disks, get_total_ram, get_model, get_processador, get_monitor, get_serialnumbermonitor, get_windows_version, get_onlinetime, get_ip_local,time_now,get_windows};
-
-use crate::requests::{sendinfos};
+//#![windows_subsystem = "windows"]
+use crate::getinfo::*;
+use crate::requests::*;
 use tokio::time::{sleep, Duration, Instant};
 
 mod getinfo;
@@ -10,54 +9,32 @@ mod requests;
 #[tokio::main]
 async fn main() {
     let mut last_mongodb_call = Instant::now();
-
-    let mongodb_interval = Duration::from_secs(1800);
+    let mongodb_interval = Duration::from_secs(10);
 
     loop {
-        let now = Instant::now();
+        if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {
+            let info = Infos {
+                nome: get_namepc(),
+                nomeusuario: get_username(),
+                servicetag: get_serialnumber(),
+                modelo: get_model(),
+                versao: get_windows_version(),
+                windows: get_windows(),
+                ip: get_ip_local(),
+                disco: get_disks(),
+                processador: get_processador(),
+                ram: get_total_ram(),
+                monitor: get_monitor().unwrap_or_else(|| "Sem Monitor".to_string()),
+                snmonitor: get_serialnumbermonitor().unwrap_or_else(|| "Sem Monitor".to_string()),
+                time: time_now(),
+                passwordpost: "JolyneTheCat1202.07".to_string(),
+            };
 
-        if now.duration_since(last_mongodb_call) >= mongodb_interval {
             get_onlinetime();
-            let active = get_windows();
-            let serialnumber = get_serialnumber();
-            let nomepc = get_namepc();
-            let username = get_username();
-            let disk = get_disks();
-            let ram = get_total_ram();
-            let model = get_model();
-            let ip = get_ip_local();
-            let processador = get_processador();
-            let version = get_windows_version();
-            let mut monitor = get_monitor();
-            let mut smodel = get_serialnumbermonitor();
-            let time = time_now();
 
-            if smodel == "" && monitor == "" {
-                smodel = "Sem Monitor".to_string();
-                monitor = "Sem Monitor".to_string();
-            }
-
-            sendinfos(
-                serialnumber,
-                nomepc.clone(),
-                username,
-                disk,
-                ram,
-                model,
-                version,
-                active,
-                ip,
-                processador,
-                monitor,
-                smodel,
-                time,
-            )
-                .await
-                .expect("Erro ao chamar MongoDB");
-
-            last_mongodb_call = now;
+            sendinfos(info).await.expect("Erro ao chamar MongoDB");
+            last_mongodb_call = Instant::now();
         }
-
         sleep(Duration::from_secs(5)).await;
     }
 }

@@ -1,80 +1,36 @@
 use serde::{Serialize, Deserialize};
 use reqwest::Client;
-use std::error::Error;
 
-#[derive(Serialize, Deserialize)]
-struct Infos {
-    nome: String,
-    nomeusuario : String,
-    servicetag: String,
-    modelo: String,
-    versao: String,
-    windows: String,
-    ip: String,
-    disco: String,
-    processador: String,
-    ram: String,
-    monitor: String,
-    snmonitor: String,
-    time: String,
-    passwordpost: String,
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Infos {
+    pub nome: String,
+    pub nomeusuario : String,
+    pub servicetag: String,
+    pub modelo: String,
+    pub versao: String,
+    pub windows: String,
+    pub ip: String,
+    pub disco: String,
+    pub processador: String,
+    pub ram: String,
+    pub monitor: String,
+    pub snmonitor: String,
+    pub time: String,
+    pub passwordpost: String,
 }
 
-pub async fn sendinfos(
-       serial: String,
-       namepc: String,
-       username: String,
-       disk: String,
-       rampc: String,
-       model: String,
-       versao: String,
-       windows: String,
-       ip: String,
-       process: String,
-       tela: String,
-       smonitor: String,
-       time: String,
-) -> Result<(), Box<dyn Error>>{
-
-    let info = Infos{
-        nome: namepc,
-        nomeusuario: username,
-        servicetag: serial,
-        modelo: model,
-        versao: versao,
-        windows: windows,//.clone(),
-        ip: ip,
-        disco: disk,
-        processador: process,
-        ram: rampc,
-        monitor: tela,
-        snmonitor: smonitor,
-        time: time,
-        passwordpost: "JolyneTheCat1202.07".to_string()
-    };
-    
+pub async fn sendinfos(info: Infos) -> Result<(), reqwest::Error> {
     let client = Client::new();
-    //println!("{}", &windows);
-
-    let res = client.post("http://192.168.1.99:3000/dbinfos")
+    let res = client.post("http://192.168.20.8:3000/dbinfos")
         .json(&info)
         .send()
-        .await;
+        .await?;
 
-    match res {
-        Ok(response) => {
-            let status = response.status();
-
-            if status.is_success() {
-                println!("Sucesso ao enviar as infos para a api");
-            } else {
-                println!("Erro ao mandar as infos para a api, status {}", status);
-            }
-        },
-        Err(e) => {
-            println!("Erro ao enviar a requisição {}", e);
-        }
-    }   
+    if res.status().is_success() {
+        println!("Sucesso ao enviar as infos para a api");
+    } else {
+        println!("Erro ao mandar as infos para a api, status {}", res.status());
+    }
 
     Ok(())
 }
