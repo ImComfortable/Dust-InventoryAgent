@@ -5,7 +5,7 @@ Initial readme file, only for setup.
 - ServiceTag
 - Hostname
 - Actual User
-- Ip
+- Local IP(for now, only if computer is connect via cable)
 - Monitor
 - Service Tag PC and Monitor
 - Windows version
