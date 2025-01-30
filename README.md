@@ -2,8 +2,7 @@ Initial readme file, only for setup.
 
 
 # Agent features:
-- ServiceTag
-- Pc Model
+- PC Model
 - Hostname from computer
 - Actual User
 - Local IP(for now, only if computer is connect via cable)
