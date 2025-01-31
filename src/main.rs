@@ -1,4 +1,4 @@
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 use crate::getinfo::*;
 use crate::requests::*;
 use tokio::time::{sleep, Duration, Instant};
@@ -24,8 +24,14 @@ async fn main() {
                 disco: get_disks(),
                 processador: get_processador(),
                 ram: get_total_ram(),
-                monitor: get_monitor().unwrap_or_else(|| "Sem Monitor".to_string()),
-                snmonitor: get_serialnumbermonitor().unwrap_or_else(|| "Sem Monitor".to_string()),
+                monitor: match get_monitor() {
+                    Some(m) => m,
+                    None => "Sem Monitor".to_string()
+                },
+                 snmonitor: match get_serialnumbermonitor() {
+                    Some(sn) => sn,
+                    None => "Sem Monitor".to_string()
+                },
                 time: time_now(),
                 passwordpost: "JolyneTheCat1202.07".to_string(),
             };
