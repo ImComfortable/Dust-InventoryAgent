@@ -43,11 +43,25 @@ const infoschema = new mongoose.Schema({
     },
     monitor: {
         type: String,
-        required: true
+        required: true,
+        default: "Sem Monitor",
+        set: function(value) {
+            if (!value || value.trim().length === 0) {
+                return "Sem Monitor";
+            }
+            return value;
+        }
     },
     snmonitor: {
         type: String,
-        required: true
+        required: true,
+        default: "Sem Monitor",
+        set: function(value) {
+            if (!value || value.trim().length === 0) {
+                return "Sem Monitor";
+            }
+            return value;
+        }
     },
     time: {
         type: String,

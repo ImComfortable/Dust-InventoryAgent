@@ -24,14 +24,8 @@ async fn main() {
                 disco: get_disks(),
                 processador: get_processador(),
                 ram: get_total_ram(),
-                monitor: match get_monitor() {
-                    Some(m) => m,
-                    None => "Sem Monitor".to_string()
-                },
-                 snmonitor: match get_serialnumbermonitor() {
-                    Some(sn) => sn,
-                    None => "Sem Monitor".to_string()
-                },
+                monitor: get_monitor().expect("Sem monitor"),
+                snmonitor: get_serialnumbermonitor().expect("Sem monitor"),
                 time: time_now(),
                 passwordpost: "JolyneTheCat1202.07".to_string(),
             };
