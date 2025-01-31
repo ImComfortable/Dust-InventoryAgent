@@ -1,10 +1,9 @@
 use serde::{Serialize, Deserialize};
-use reqwest::Client;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Infos {
     pub nome: String,
-    pub nomeusuario : String,
+    pub usuario : String,
     pub servicetag: String,
     pub modelo: String,
     pub versao: String,
@@ -21,6 +20,12 @@ pub struct Infos {
 
 pub async fn sendinfos(info: Infos) -> Result<(), ()> {
     let client = reqwest::Client::new();
+
+    let usuario_teste = &info.usuario;
+
+    println!{"{}", usuario_teste}
+
+
     match client.post("http://192.168.1.99:3000/dbinfos")
         .json(&info)
         .send()

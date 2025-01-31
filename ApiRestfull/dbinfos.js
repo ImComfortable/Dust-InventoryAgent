@@ -5,13 +5,15 @@ const infoschema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    nomeusuario: {
+    usuario: {
         type: String,
         required: true,
         validate: {
-            validator: function(value){
-            return value.toLowerCase() !== 'candeias';
+            validator: function(value) {
+                const forbiddenNames = ['candeias', 'admin', 'teste'];
+                return !forbiddenNames.includes(value.toLowerCase());
             },
+            message: 'Nome de usuário não permitido.'
         },
     },
     servicetag: {

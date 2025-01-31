@@ -15,7 +15,7 @@ async fn main() {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {
             let info = Infos {
                 nome: get_namepc(),
-                nomeusuario: get_username(),
+                usuario: get_username(),
                 servicetag: get_serialnumber(),
                 modelo: get_model(),
                 versao: get_windows_version(),

@@ -111,7 +111,7 @@ pub fn get_username() -> String {
         Ok(username) => {
             let usernameout = String::from_utf8_lossy(&username.stdout);
             let username_clean = usernameout.trim();
-            println!("{}", username_clean);
+
             username_clean.to_string()
         }
         Err(_) => "Error to catch the username".to_string()
@@ -306,7 +306,6 @@ pub fn get_windows() -> String {
         Ok(model) => {
             let output = String::from_utf8_lossy(&model.stdout);
             let saida = output.trim().to_string();
-            //println!("{}", &saida);
             if saida.contains("1") {
                 "Windows Ativo".to_string()
             } else {
