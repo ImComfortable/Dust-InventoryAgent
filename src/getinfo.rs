@@ -103,16 +103,16 @@ pub fn get_model() -> String {
     }
 }
 pub fn get_username() -> String {
-    let username = Command::new("cmd")
-        .arg("/C")
-        .arg("whoami")
+    let username = Command::new("powershell")
+        .arg("$env:USERNAME")
         .creation_flags(CREATE_NO_WINDOW)
         .output();
     match username {
         Ok(username) => {
             let usernameout = String::from_utf8_lossy(&username.stdout);
-            let usernameoutclean = usernameout.rsplit('\\').next();
-            usernameoutclean.unwrap_or("").trim().to_string()
+            let username_clean = usernameout.trim();
+            println!("{}", username_clean);
+            username_clean.to_string()
         }
         Err(_) => "Error to catch the username".to_string()
     }

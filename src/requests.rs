@@ -19,18 +19,23 @@ pub struct Infos {
     pub passwordpost: String,
 }
 
-pub async fn sendinfos(info: Infos) -> Result<(), reqwest::Error> {
-    let client = Client::new();
-    let res = client.post("http://192.168.20.8:3000/dbinfos")
+pub async fn sendinfos(info: Infos) -> Result<(), ()> {
+    let client = reqwest::Client::new();
+    match client.post("http://192.168.1.99:3000/dbinfos")
         .json(&info)
         .send()
-        .await?;
-
-    if res.status().is_success() {
-        println!("Sucesso ao enviar as infos para a api");
-    } else {
-        println!("Erro ao mandar as infos para a api, status {}", res.status());
+        .await {
+        Ok(res) => {
+            if res.status().is_success() {
+                println!("Sucesso ao enviar as infos para a api");
+            } else {
+                println!("Erro ao mandar as infos para a api, status {}", res.status());
+            }
+            Ok(())
+        }
+        Err(_) => {
+            println!("Falha na conexão com a API");
+            Ok(())
+        }
     }
-
-    Ok(())
-}
+ }
