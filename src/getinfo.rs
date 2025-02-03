@@ -242,15 +242,13 @@ pub fn get_onlinetime() {
 pub fn get_windows_version() -> String {
     let output = Command::new("powershell")
         .arg("/C")
-        .arg(format!("(Get-ComputerInfo).WindowsProductName + ' ' + (Get-ComputerInfo).WindowsCurrentVersion"))
+        .arg(format!("(Get-WmiObject -Class Win32_OperatingSystem).Caption + ' ' + (Get-WmiObject -Class Win32_OperatingSystem).Version"))
         .creation_flags(CREATE_NO_WINDOW)
         .output();
 
     match output {
         Ok(output) => {
             let ver_output = String::from_utf8_lossy(&output.stdout);
-
-            // Verifique se a saída contém a versão do Windows e a build
             let version_info = ver_output.trim();
             if !version_info.is_empty() {
                 return version_info.to_string();
