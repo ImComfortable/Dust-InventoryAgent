@@ -278,7 +278,7 @@ pub fn get_disk_storage() -> String {
 pub fn get_ip_local() -> String {
     let ip = Command::new("Powershell")
         .arg("/C")
-        .arg(r#"(Get-NetIPAddress -InterfaceAlias "Ethernet" | Where-Object { $_.AddressFamily -eq "IPv4" }).IPAddress"#)
+        .arg(r#"(ipconfig | findstr IPv4 | select -First 1).Split()[-1]"#)
         .creation_flags(CREATE_NO_WINDOW)
         .output();
         
