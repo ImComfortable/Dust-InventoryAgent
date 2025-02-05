@@ -9,7 +9,7 @@ mod requests;
 #[tokio::main]
 async fn main() {
     let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(10);
+    let mongodb_interval = Duration::from_secs(300);
 
     loop {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {
