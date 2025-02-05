@@ -5,9 +5,9 @@ Initial readme file, only for setup.
 - PC Model
 - Hostname
 - Actual User
-- Local IP(for now, only if computer is connect via cable)
+- Local IP
 - Monitor Model
-- Service Tag(PC and Monitor)
+- Service Tag (PC and Monitor)
 - Windows version
 - If windows is active
 - Power Off Computer if it's online for more three days
