@@ -24,7 +24,7 @@ mongoose.connect('mongodb://mongoconnectURL')
             continue;
         }
 
-        if (passwordpost !== "JolyneTheCat1202.07") {
+        if (passwordpost !== "SuperSecretPostPassword") {
             responses.push({ status: 400, message: "Incorrect Password" });
             continue;
         }
