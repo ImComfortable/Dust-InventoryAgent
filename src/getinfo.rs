@@ -216,7 +216,7 @@ pub fn get_onlinetime() {
 
                         Command::new("Cmd")
                             .arg("/c")
-                            .arg("shutdown /s /t 1800")
+                            .arg("shutdown /r /t 1800")
                             .output()
                             .expect("Falha ao programar o desligamento");
 
