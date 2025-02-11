@@ -1,4 +1,8 @@
 #![windows_subsystem = "windows"]
+
+
+//hasharquivo B1E7964C5CE9F9E8C6031F4A0097ADCC079C70C75746A0CF8A6E4CBE6FB2F56A
+
 use crate::getinfo::*;
 use crate::requests::*;
 use tokio::time::{sleep, Duration, Instant};
