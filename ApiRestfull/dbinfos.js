@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const infoschema = new mongoose.Schema({
-    // Informações do Dispositivo
     nome: {
         type: String,
         required: true,
@@ -37,8 +36,7 @@ const infoschema = new mongoose.Schema({
             return value;
         }
     },
-
-    // Informações do Sistema Operacional
+    
     windows: {
         type: String,
         required: true,
@@ -56,13 +54,12 @@ const infoschema = new mongoose.Schema({
         required: true
     },
 
-    // Informações de Rede
     usuario: {
         type: String,
         required: true,
         validate: {
             validator: function(value) {
-                const forbiddenNames = ['candeias', 'admin', 'teste'];
+                const forbiddenNames = ['admin', 'teste'];
                 return !forbiddenNames.includes(value.toLowerCase());
             },
             message: 'Nome de usuário não permitido.'
