@@ -21,7 +21,7 @@ pub struct Infos {
 pub async fn sendinfos(info: Infos) -> Result<(), ()> {
     let client = reqwest::Client::new();
 
-    match client.post("http://192.168.1.99:3000/dbinfos")
+    match client.post("UrlToServerRestFull")
         .json(&info)
         .send()
         .await {

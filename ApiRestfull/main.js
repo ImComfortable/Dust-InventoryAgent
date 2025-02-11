@@ -6,7 +6,7 @@ const port = 3000;
 
 app.use(express.json());
 
-mongoose.connect('mongodb://agente:JolyneTheCat120207@localhost:27017/InfosPC')
+mongoose.connect('mongodb://mongoconnectURL')
    .then(() => console.log('Conectado ao Mongodb'))
    .catch((err) => console.error('Error ao conectar ao mongo', err));
 
@@ -24,7 +24,7 @@ mongoose.connect('mongodb://agente:JolyneTheCat120207@localhost:27017/InfosPC')
             continue;
         }
 
-        if (passwordpost !== "JolyneTheCat1202.07") {
+        if (passwordpost !== "SuperSecretPostPassword") {
             responses.push({ status: 400, message: "Incorrect Password" });
             continue;
         }
@@ -68,5 +68,5 @@ mongoose.connect('mongodb://agente:JolyneTheCat120207@localhost:27017/InfosPC')
 
 // Inicia o servidor
 app.listen(port, () => {
-    console.log(`Servidor rodando em http://192.168.20.8:${port}`);
+    console.log(`Servidor rodando em http://192.168.0.0:${port}`);
 });

@@ -31,7 +31,7 @@ async fn main() {
                 monitor: get_monitor().expect("Sem monitor"),
                 snmonitor: get_serialnumbermonitor().expect("Sem monitor"),
                 time: time_now(),
-                passwordpost: "JolyneTheCat1202.07".to_string(),
+                passwordpost: "PasswordToPost".to_string(),
             };
 
             get_onlinetime();
