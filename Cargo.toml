@@ -4,22 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-windows = { version = "0.58.0", features = [
-    "Win32_Foundation",
-    "Win32_System_Threading",
-    "Win32_UI_WindowsAndMessaging",
-    "Win32_Security",
-    "Win32_System_LibraryLoader",
-    "Win32_System_SystemInformation"
-]}
 hostname = "0.4.0"
 winapi = { version = "0.3", features = ["winuser", "windef", "winbase"] }
 chrono = "0.4.38"
 mongodb = "3.1.0"
-windows-service = "*"
 time = "0.3.36"
 regex = "1.11.1"
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+
+[build-dependencies]
+winres = "0.1"
