@@ -1,3 +1,6 @@
+# It's an amateur project!
+The main purpose of this project is to create a simple inventory agent that will gather the information we need and send it to a MongoDB using a RESTful API.
+
 # Agent features:
 - PC Model
 - Hostname
