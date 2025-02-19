@@ -35,7 +35,7 @@ mongoose.connect('mongodb://mongoconnectURL')
             if (infoexist) {
                 const updateInfo = await Infos.findOneAndUpdate(
                     { servicetag },
-                    { nome, usuario, modelo, versao, 
+                    { nome, usuario, modelo, versao,  
                       windows, ip, processador, monitor, snmonitor, time },
                     { new: true }
                 );
@@ -68,5 +68,5 @@ mongoose.connect('mongodb://mongoconnectURL')
 
 // Inicia o servidor
 app.listen(port, () => {
-    console.log(`Servidor rodando em http://192.168.0.0:${port}`);
+    console.log(`Servidor rodando em http://192.168.1.99:${port}`);
 });

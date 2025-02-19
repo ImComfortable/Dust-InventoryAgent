@@ -49,6 +49,14 @@ const infoschema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    ram: {
+        type: String,
+        required: true,
+    },
+    disco: {
+        type: String,
+        required: true,
+    },
     time: {
         type: String,
         required: true
