@@ -131,10 +131,10 @@ pub fn get_disks() -> String {
             for line in disktout.lines() {
                 if line.contains("SSD") {
                     let space = get_disk_storage();
-                    return format!("SSD {}GB", space); // Usa format! para incluir a variável na string
+                    return format!("SSD {}GB", space); 
                 } else if line.contains("HDD") {
                     let space = get_disk_storage();
-                    return format!("HDD {}GB", space); // Mesmo aqui, formatando a string
+                    return format!("HDD {}GB", space);
                 }
             }
             "Desconhecido".to_string()
