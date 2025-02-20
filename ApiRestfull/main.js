@@ -16,8 +16,8 @@ mongoose.connect('mongodb://mongoconnectURL')
     const responses = [];
 
     for (const item of data) {
-        const { passwordpost, nome, usuario, servicetag, modelo, versao, 
-                windows, ip, processador, monitor, snmonitor, time } = item;
+        const { passwordpost, nome, usuario, servicetag, modelo, versao,
+                windows, ip, processador, ram, disco, monitor, snmonitor, time } = item;
 
         if (!passwordpost) {
             responses.push({ status: 400, message: "Password Invalid" });
@@ -36,14 +36,14 @@ mongoose.connect('mongodb://mongoconnectURL')
                 const updateInfo = await Infos.findOneAndUpdate(
                     { servicetag },
                     { nome, usuario, modelo, versao,  
-                      windows, ip, processador, monitor, snmonitor, time },
+                      windows, ip, processador, ram, disco, monitor, snmonitor, time },
                     { new: true }
                 );
                 responses.push({ status: 200, data: updateInfo });
             } else {
                 const newinfo = new Infos({
                     nome, usuario, servicetag, modelo, versao, 
-                    windows, ip, processador, monitor, snmonitor, time 
+                    windows, ip, processador, ram, disco, monitor, snmonitor, time 
                 });
                 await newinfo.save();
                 responses.push({ status: 201, data: newinfo });
