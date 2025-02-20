@@ -4,12 +4,14 @@ The main purpose of this project is to create a simple inventory agent that will
 # Agent features:
 - PC Model
 - Hostname
-- Actual User
 - Local IP
 - Monitor Model
 - Service Tag (PC and Monitor)
 - Windows version
 - If windows is active
+- CPU
+- Drive Type and Size
+- RAM
 - Power Off Computer if it's online for more three days
 
 # Features to think:
