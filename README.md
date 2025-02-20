@@ -14,6 +14,7 @@ The main purpose of this project is to create a simple inventory agent that will
 
 # Features to think:
 
+- Get all installed programs for computer
 - Install and Uninstall programs with commands or options in agent site
 - Send warnings to us, about hardware and peripherals changes, for example keyboard swap or hdd changes
 - Audit system
