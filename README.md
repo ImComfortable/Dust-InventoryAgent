@@ -1,6 +1,9 @@
 # Main purpose
 The main purpose of this project is to create a simple inventory agent that will gather the information we need and send it to a MongoDB using a RESTful API.
 
+# Site features:
+List all information from MongoDB in a table, with a change detector that will warn us if any component has changed.
+
 # Agent features:
 - PC Model
 - Hostname
