@@ -1,0 +1,98 @@
+use winapi::{
+    um::{
+        winuser::{EnumWindows, GetWindowTextW, GetWindowTextLengthW, IsWindowVisible, GetForegroundWindow},
+        winnt::LPWSTR
+    },
+    shared::{minwindef::{BOOL, LPARAM}, windef::HWND},
+};
+use std::time::{Instant, Duration};
+use std::{thread, fs::OpenOptions, fs::File, io::{Write, BufReader, BufRead}};
+use std::collections::HashMap;
+
+fn main() {
+    // Inicializa o monitoramento
+    let mut last_window: Option<String> = None;
+    let mut time_spent: std::collections::HashMap<String, Duration> = std::collections::HashMap::new();
+    let mut start_time = Instant::now();
+
+    loop {
+        // Obtem a janela ativa (primeiro item de foco)
+        let hwnd = unsafe { GetForegroundWindow() };
+        let mut length = unsafe { GetWindowTextLengthW(hwnd) };
+        
+        if length == 0 {
+            thread::sleep(Duration::from_secs(1));
+            continue;
+        }
+        
+        length += 1; // Inclui o terminador nulo
+        let mut title: Vec<u16> = vec![0; length as usize];
+        
+        unsafe {
+            GetWindowTextW(hwnd, title.as_mut_ptr() as LPWSTR, length);
+        }
+        
+        let current_title = String::from_utf16_lossy(&title[0..length as usize]);
+        
+        // Verifica se o título corresponde a um navegador
+        if current_title.contains("Firefox") || current_title.contains("Google Chrome") {
+            if last_window != Some(current_title.clone()) {
+                // Se a janela mudou, salva o tempo da janela anterior
+                if let Some(last) = last_window.clone() {
+                    let elapsed = start_time.elapsed();
+                    save_to_file(&last, elapsed);
+                }
+                // Reseta o tempo de início para a nova janela
+                start_time = Instant::now();
+                last_window = Some(current_title.clone());
+            }
+        }
+        
+        // Espera 1 segundo antes de verificar novamente
+        thread::sleep(Duration::from_secs(1));
+    }
+}
+
+fn save_to_file(window_title: &str, duration: Duration) {
+    let file_path = "monitoramento.txt";
+    let mut time_spent: HashMap<String, Duration> = HashMap::new();
+
+    // Lê o conteúdo do arquivo e atualiza o HashMap
+    if let Ok(file) = File::open(file_path) {
+        let reader = BufReader::new(file);
+        for line in reader.lines() {
+            if let Ok(line) = line {
+                let parts: Vec<&str> = line.split(", Tempo gasto: ").collect();
+                if parts.len() == 2 {
+                    let title = parts[0].replace("Título: ", "");
+                    if let Ok(prev_duration) = parse_duration(parts[1]) {
+                        time_spent.insert(title, prev_duration);
+                    }
+                }
+            }
+        }
+    }
+
+    // Atualiza o tempo gasto para o título atual
+    let entry = time_spent.entry(window_title.to_string()).or_insert(Duration::new(0, 0));
+    *entry += duration;
+
+    // Escreve o conteúdo atualizado de volta no arquivo
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(file_path)
+        .unwrap();
+
+    for (title, duration) in &time_spent {
+        writeln!(file, "Título: {}, Tempo gasto: {:?}", title, duration).unwrap();
+    }
+}
+
+fn parse_duration(s: &str) -> Result<Duration, std::num::ParseIntError> {
+    let parts: Vec<&str> = s.trim_matches(|p| p == 's' || p == 'm' || p == 'h' || p == 'd' || p == 'w' || p == 'y').split(':').collect();
+    let secs = parts[0].parse::<u64>()?;
+    let nanos = parts[1].parse::<u32>()?;
+    Ok(Duration::new(secs, nanos))
+}
