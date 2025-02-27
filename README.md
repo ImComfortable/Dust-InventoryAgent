@@ -23,6 +23,4 @@ Audit system, which monitors all pages accessed by the user and the time he spen
 
 - Get all installed programs for computer
 - Install and Uninstall programs with commands or options in agent site
-- Send warnings to us, about hardware and peripherals changes, for example keyboard swap or hdd changes
-- Audit system
 - stage validation
