@@ -4,7 +4,7 @@ The main purpose of this project is to create a simple inventory agent that will
 # Site features:
 List all information from MongoDB in a table, with a change detector that will warn us if any component has changed.
 
-Audit system, which monitors all pages accessed by the user and the time he spent on them
+Audit system, which monitors all pages accessed by the user and the time he spent on them.
 
 # Agent features:
 - PC Model
