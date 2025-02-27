@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use crate::get_username;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Infos {
@@ -18,10 +19,18 @@ pub struct Infos {
     pub passwordpost: String,
 }
 
+#[derive(Serialize)]
+struct Payload {
+    user: String,
+    page: String,
+    date: String,
+    seconds: f64,
+}
+
 pub async fn sendinfos(info: Infos) -> Result<(), ()> {
     let client = reqwest::Client::new();
 
-    match client.post("UrlToServerRestFull")
+    match client.post("http://192.168.1.99:3000/dbinfos")
         .json(&info)
         .send()
         .await {
@@ -29,3 +38,19 @@ pub async fn sendinfos(info: Infos) -> Result<(), ()> {
         Err(_) => Ok(())
     }
  }
+
+ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), Box<dyn std::error::Error>> {
+    let client = reqwest::Client::new();
+
+    let user = get_username();
+
+    let payload = Payload { user, page, date, seconds };
+
+    match client.post("http://192.168.22.80:3000/atualizar-documentos")
+        .json(&payload)
+        .send()
+        .await {
+        Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e))
+    }
+}

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candeias T.I - Inventário de Ativos</title>
+    <link rel="stylesheet" type="text/css" href="inventory.css"/>
+</head>
+<body>
+    <div class="background"></div>
+    <header class="header">
+        <div class="logo">Candeias T.I</div>
+        <nav class="nav-menu">
+            <button class="nav-button active" id="inventory">Inventário</button>
+        </nav>
+        <button class="cta-button" id="logout">Logout</button>
+    </header>
+    <main class="main-content">
+        <h1>Inventário de Ativos</h1>
+        <div class="search-bar">
+            <input type="text" placeholder="Pesquisar ativos...">
+            <button>Buscar</button>
+        </div>
+        <div class="assets-table-container">
+            <table class="assets-table">
+                <thead>
+                    <tr>
+                        <th>Nome do PC</th>
+                        <th>Service Tag</th>
+                        <th>Usuario</th>
+                        <th>Opção</th>
+                        <th>Aviso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <span class="close-button">&times;</span>
+            <h2>Detalhes do Equipamento</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <strong>Nome do PC:</strong>
+                    <span id="modal-nome"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Modelo:</strong>
+                    <span id="modal-modelo"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Service Tag:</strong>
+                    <span id="modal-servicetag"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Usuário:</strong>
+                    <span id="modal-usuario"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>S/N Monitor:</strong>
+                    <span id="modal-snmonitor"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Monitor:</strong>
+                    <span id="modal-monitor"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Versão Windows:</strong>
+                    <span id="modal-versao"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Status Windows:</strong>
+                    <span id="modal-windows"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Tipo do Disco:</strong>
+                    <span id="modal-disco"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Processador:</strong>
+                    <span id="modal-processador"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Memória RAM:</strong>
+                    <span id="modal-ram"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>IP:</strong>
+                    <span id="modal-ip"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pagesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <span class="close-button">&times;</span>
+            <h2>Histórico de Navegação do Usuário</h2>
+            <div class="user-info">
+                <strong>Usuário:</strong> <span id="pages-usuario"></span>
+            </div>
+            <div class="pages-list-container">
+                <table class="pages-table">
+                    <thead>
+                        <tr>
+                            <th>Página</th>
+                            <th>Data</th>
+                            <th>Tempo No Site</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pages-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const CONFIG = {
+        API_URL: 'http://192.168.22.80:8080',
+        ROUTES: {
+            INVENTORY: 'inventorypage.html'
+        }
+    };
+
+    async function fetchInventoryData() {
+        console.log("Função fetchInventoryData iniciada");
+        try {
+            const response = await fetch(`${CONFIG.API_URL}/get_all_data`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Erro na requisição:', errorData);
+                throw new Error(errorData.message || 'Erro ao buscar dados');
+            }
+
+            const data = await response.json();
+            console.log("Dados recebidos:", data);
+
+            const tbody = document.querySelector(".assets-table tbody");
+            if (!tbody) {
+                console.error("Elemento tbody não encontrado!");
+                return;
+            }
+            console.log("Elemento tbody encontrado");
+
+            tbody.innerHTML = "";
+
+            if (Array.isArray(data) && data.length > 0) {
+                console.log("Dados são um array válido. Primeiro item:", data[0]);
+                data.forEach((item, index) => {
+                    console.log(`Processando item ${index}:`, item);
+
+                    const row = document.createElement("tr");
+                    row.appendChild(createCell(item.nome || "N/A"));
+                    row.appendChild(createCell(item.servicetag || "N/A"));
+                    row.appendChild(createCell(item.usuario || "N/A"));
+
+                    const actioncell = document.createElement("td");
+
+                    const detailsbutton = document.createElement("button");
+                    detailsbutton.textContent = "Informações";
+                    detailsbutton.classList.add("details-button");
+                    detailsbutton.addEventListener("click", () => {
+                        showDetailsModal(item);
+                    });
+                    actioncell.appendChild(detailsbutton);
+
+                    const pagesbutton = document.createElement("button");
+                    pagesbutton.textContent = "Relatorio";
+                    pagesbutton.classList.add("relatorio-button");
+                    pagesbutton.addEventListener("click", () => {
+                        showDetailsPages(item);
+                    });
+                    actioncell.appendChild(pagesbutton);
+                    row.appendChild(actioncell);
+                
+                    const warningCell = document.createElement("td");
+                    const warningIcon = document.createElement("span");
+                    warningIcon.classList.add("warning-icon");
+                    warningIcon.textContent = "⚠";
+                    if (item.warning) {
+                        warningIcon.classList.add("active");
+                    }
+                    warningCell.appendChild(warningIcon);
+                    row.appendChild(warningCell);
+
+                    tbody.appendChild(row);
+
+                    warningIcon.addEventListener("mouseover", async () => {
+                        const warning = await fetchMongoDBData(item.servicetag);
+                        showTooltip(warningIcon, warning);
+                    });
+
+                    warningIcon.addEventListener("mouseout", () => {
+                        hideTooltip();
+                    });
+                });
+                console.log("Tabela preenchida com sucesso");
+            } else {
+                console.error("Os dados recebidos não são um array válido:", data);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar ou processar dados:', error);
+        }
+    }
+
+    function showDetailsModal(item) {
+    document.getElementById("modal-nome").textContent = item.nome || "N/A";
+    document.getElementById("modal-modelo").textContent = item.modelo || "N/A";
+    document.getElementById("modal-servicetag").textContent = item.servicetag || "N/A";
+    document.getElementById("modal-usuario").textContent = item.usuario || "N/A";
+    document.getElementById("modal-snmonitor").textContent = item.snmonitor || "N/A";
+    document.getElementById("modal-monitor").textContent = item.monitor || "N/A";
+    document.getElementById("modal-versao").textContent = item.versao || "N/A";
+    document.getElementById("modal-windows").textContent = item.windows || "N/A";
+    document.getElementById("modal-disco").textContent = item.disco || "N/A";
+    document.getElementById("modal-processador").textContent = item.processador || "N/A";
+    document.getElementById("modal-ram").textContent = item.ram || "N/A";
+    document.getElementById("modal-ip").textContent = item.ip || "N/A";
+    
+    const modal = document.getElementById("detailsModal");
+    modal.style.display = "flex";
+
+    }
+
+    async function showDetailsPages(item) {
+    const usuario = item.usuario;
+    document.getElementById("pages-usuario").textContent = usuario || "N/A";
+    
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/get_user_pages/${usuario}`);
+        if (!response.ok) {
+            throw new Error('Erro ao buscar histórico de navegação');
+        }
+        
+        const pagesData = await response.json();
+        const tbody = document.getElementById("pages-tbody");
+        tbody.innerHTML = "";
+        
+        if (Array.isArray(pagesData) && pagesData.length > 0) {
+            pagesData.forEach(page => {
+                const row = document.createElement("tr");
+                row.appendChild(createCell(page.title || "N/A"));
+                row.appendChild(createCell(page.date || "N/A"));
+                row.appendChild(createCell(formatTime(page.seconds)));
+                tbody.appendChild(row);
+            });
+        } else {
+            const emptyRow = document.createElement("tr");
+            const emptyCell = document.createElement("td");
+            emptyCell.colSpan = 3;
+            emptyCell.textContent = "Nenhum histórico de navegação encontrado";
+            emptyCell.style.textAlign = "center";
+            emptyRow.appendChild(emptyCell);
+            tbody.appendChild(emptyRow);
+        }
+        
+        const modal = document.getElementById("pagesModal");
+        modal.style.display = "flex";
+    } catch (error) {
+        console.error('Erro ao buscar dados de navegação:', error);
+        alert('Erro ao carregar histórico de navegação');
+    }
+}
+
+    function createCell(value) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        return cell;
+    }
+
+    async function fetchMongoDBData(servicetag) {
+        const response = await fetch(`${CONFIG.API_URL}/get_warnings/${servicetag}`);
+        const data = await response.json();
+        return data;
+    }
+
+    function showTooltip(element, data) {
+        const tooltip = document.createElement("div");
+        tooltip.classList.add("tooltip");
+
+        if (data.length === 0) {
+            tooltip.textContent = "Nenhuma alteração encontrada";
+        } else {
+            tooltip.innerHTML = data.map(item => `<b>Alterações Realizadas</b><br><b>Coluna: </b>${item.Informação}</br><b>Valor Antigo: </b>${item.ValorAntigo}<br><b>Valor Novo: </b>${item.NovoValor}</br><br>`).join('\n');
+        }
+
+        document.body.appendChild(tooltip);
+
+        const rect = element.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + window.scrollX}px`;
+        tooltip.style.top = `${rect.bottom + window.scrollY}px`;
+        tooltip.style.display = "block";
+    }
+
+    function hideTooltip() {
+        const tooltip = document.querySelector(".tooltip");
+        if (tooltip) {
+            tooltip.remove();
+        }
+    }
+
+    function formatTime(seconds) {
+    if (!seconds && seconds !== 0) return "N/A";
+    const totalSeconds = Number(seconds);
+    
+    if (isNaN(totalSeconds)) return "N/A";
+    
+    if (totalSeconds < 60) {
+        return `${totalSeconds.toFixed(1)} segundos`;
+    } else if (totalSeconds < 3600) {
+        const minutes = totalSeconds / 60;
+        return `${minutes.toFixed(1)} minutos`;
+    } else {
+        const hours = totalSeconds / 3600;
+        return `${hours.toFixed(1)} horas`;
+    }
+    }
+
+    window.onload = function() {
+    console.log("Evento window.onload disparado");
+    fetchInventoryData();
+    
+    const closeButtonDetails = document.querySelector("#detailsModal .close-button");
+    const modalDetails = document.getElementById("detailsModal");
+    
+    closeButtonDetails.addEventListener("click", () => {
+        modalDetails.style.display = "none";
+    });
+    
+    window.addEventListener("click", (event) => {
+        if (event.target === modalDetails) {
+            modalDetails.style.display = "none";
+        }
+    });
+
+    const closeButtonPages = document.querySelector("#pagesModal .close-button");
+    const modalPages = document.getElementById("pagesModal");
+    
+    closeButtonPages.addEventListener("click", () => {
+        modalPages.style.display = "none";
+    });
+    
+    window.addEventListener("click", (event) => {
+        if (event.target === modalPages) {
+            modalPages.style.display = "none";
+        }
+    });
+};
+</script>
+</html>

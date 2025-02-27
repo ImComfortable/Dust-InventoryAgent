@@ -77,8 +77,35 @@ const infoschema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    programs: {
+        type: Array,
+        required: true,
+    },
 });
 
-const info = mongoose.model("infos", infoschema);
+const pagesSchema = new mongoose.Schema({
+    user: {
+        type: String,
+        required: true,
+    },
+    title: {
+        type: String,
+        required: true,
+    },
+    date: {
+        type: String,
+        required: true,
+    },
+    seconds: {
+        type: Number,
+        required: true,
+    },
+})
 
-module.exports = info;
+const Info = mongoose.model("infos", infoschema);
+const Pages = mongoose.model("pages", pagesSchema);
+
+module.exports = {
+    Info,
+    Pages
+}

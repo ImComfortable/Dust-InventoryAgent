@@ -1,11 +1,15 @@
 use hostname::get as get_hostname;
 use winapi::um::winbase::CREATE_NO_WINDOW;
-use tokio::time::{Duration};
+use tokio::time::{Duration, Instant};
 use std::process::{Command};
 use std::os::windows::process::CommandExt;
 use std::thread;
 use regex::Regex;
 use chrono::Local;
+use crate::requests::sendpages;
+use winapi::{
+    um::{
+        winuser::{GetWindowTextW, GetWindowTextLengthW, GetForegroundWindow},winnt::LPWSTR},};
 
 pub fn get_serialnumber() -> String {
     let servicetag = Command::new("powershell")
@@ -310,6 +314,71 @@ pub fn get_windows() -> String {
                 "Precisa ativar o windows".to_string()
             }
         }
-        Err(_) => "Error ao coletar o modelo do dispositivo".to_string()
+        Err(_) => "Error ao coletar o status do windows do dispositivo".to_string()
     }
+}
+pub fn get_programs() -> Vec<String> {
+    let output = Command::new("powershell")
+        .arg("-Command")
+        .arg("Get-ItemProperty HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*, HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\* | Where-Object { $_.DisplayName -ne $null -and $_.SystemComponent -ne 1 -and $_.DisplayName -notmatch 'Microsoft' -and $_.DisplayName -notmatch 'Windows' } | Select-Object DisplayName, DisplayVersion | Sort-Object DisplayName | ForEach-Object { \"{0} ({1})\" -f $_.DisplayName, $_.DisplayVersion }")
+        .creation_flags(CREATE_NO_WINDOW)
+        .output()
+        .expect("Erro ao executar o comando");
+
+    let output_str = String::from_utf8(output.stdout).expect("Erro ao converter a saída para string");
+    output_str.lines().map(|line| line.to_string()).collect()
+}
+pub async fn getwindows() {
+
+    let mut last_window: Option<String> = None;
+    let mut start_time = Instant::now();
+
+    loop {
+        let hwnd = unsafe { GetForegroundWindow() };
+        let length = unsafe { GetWindowTextLengthW(hwnd) };
+
+        if length == 0 {
+            thread::sleep(Duration::from_secs(1));
+            continue;
+        }
+
+        let mut title: Vec<u16> = vec![0; (length + 1) as usize];
+
+        unsafe {
+            GetWindowTextW(hwnd, title.as_mut_ptr() as LPWSTR, length + 1);
+        }
+
+        let current_title = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
+
+        if current_title.contains("Firefox") || current_title.contains("Google Chrome") || current_title.contains("Microsoft Edge") || current_title.contains("Brave") {
+            if last_window.as_ref() != Some(&current_title) {
+                if let Some(last) = last_window.clone() {
+                    let elapsed = start_time.elapsed();
+                    if let Err(e) = send_to_mongo(&last, elapsed).await {
+                        eprintln!("Erro ao atualizar o resumo do MongoDB: {}", e);
+                    }
+                }
+                start_time = Instant::now();
+                last_window = Some(current_title.clone());
+            }
+        }
+
+        thread::sleep(Duration::from_secs(1));
+    }
+}
+
+async fn send_to_mongo(window_title: &str, duration: Duration) -> Result<(), Box<dyn std::error::Error>> {
+    let current_date = Local::now().format("%d-%m-%Y").to_string();
+    let seconds = duration.as_secs_f64();
+
+    let page = window_title.trim().to_string();
+    let date = current_date.trim().to_string();
+    let seconds = seconds;
+
+    println!("{}", page);
+
+    sendpages(page, date, seconds).await?;
+    
+
+    Ok(())
 }

@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+//#![windows_subsystem = "windows"]
 
 use crate::getinfo::*;
 use crate::requests::*;
@@ -7,10 +7,15 @@ use tokio::time::{sleep, Duration, Instant};
 mod getinfo;
 mod requests;
 
+
 #[tokio::main]
 async fn main() {
     let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(300);
+    let mongodb_interval = Duration::from_secs(10);
+
+    tokio::spawn(async {
+        getwindows().await;
+    });
 
     loop {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {
@@ -28,7 +33,7 @@ async fn main() {
                 monitor: get_monitor().expect("Sem monitor"),
                 snmonitor: get_serialnumbermonitor().expect("Sem monitor"),
                 time: time_now(),
-                passwordpost: "PasswordToPost".to_string(),
+                passwordpost: "JolyneTheCat1202.07".to_string(),
             };
 
             get_onlinetime();
