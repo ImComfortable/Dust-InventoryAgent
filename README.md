@@ -17,7 +17,7 @@ Audit system, which monitors all pages accessed by the user and the time he spen
 - CPU
 - Drive Type and Size
 - RAM
-- Power Off Computer if it's online for more three days
+- Restart Computer if it's online for more three days
 
 # Features to think:
 
