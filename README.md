@@ -1,5 +1,5 @@
 # Main purpose
-The main purpose of this project is to create a simple inventory agent that will gather the information we need and send it to a MongoDB using a RESTful API.
+Build a powerful agent and platform that work together to automate inventory management, manege asset and generate insightful reports.
 
 # Site features:
 List all information from MongoDB in a table, with a change detector that will warn us if any critic component has changed.
