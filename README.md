@@ -18,9 +18,12 @@ Audit system, which monitors all pages accessed by the user and the time he spen
 - Drive Type and Size
 - RAM
 - Restart Computer if it's online for more three days
+- Get all installed programs from computer
 
 # Features to think:
 
-- Get all installed programs for computer
-- Install and Uninstall programs with commands or options in agent site
-- stage validation
+- Stage validation, and improve all requests
+- Remake all website, put on a side bar to make it more floww
+- Build a MSI using WixToolSet to facilitate distribuition
+- secure all routes from website and implement a token system
+  
