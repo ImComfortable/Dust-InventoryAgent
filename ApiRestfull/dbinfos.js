@@ -78,7 +78,7 @@ const infoschema = new mongoose.Schema({
         required: true,
     },
     programs: {
-        type: Array,
+        type: [String],
         required: true,
     },
 });
@@ -102,10 +102,10 @@ const pagesSchema = new mongoose.Schema({
     },
 })
 
-const Info = mongoose.model("infos", infoschema);
+const Infos = mongoose.model("infos", infoschema);
 const Pages = mongoose.model("pages", pagesSchema);
 
 module.exports = {
-    Info,
+    Infos,
     Pages
 }

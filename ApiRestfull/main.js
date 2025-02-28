@@ -4,7 +4,7 @@ const { Infos, Pages } = require('./dbinfos');
 const app = express();
 const port = 3000;
 
-const MONGODB_URI = 'mongodb://agente:JolyneTheCat120207@192.168.1.99:27017/InfosPC';
+const MONGODB_URI = 'mongodb://localhost:27017/infosdb';
 const POST_PASSWORD = 'SuperSecretPostPassword';
 const SERVER_ADDRESS = '192.168.22.80';
 
@@ -22,29 +22,31 @@ app.post('/dbinfos', async (req, res) => {
     for (const item of data) {
         const { 
             passwordpost, nome, usuario, servicetag, modelo, versao,
-            windows, ip, processador, ram, disco, monitor, snmonitor, time 
+            windows, ip, processador, ram, disco, monitor, snmonitor, time, programs 
         } = item;
 
+        console.log(item)
+
         // Validação da senha
-        if (!passwordpost) {
+        /*if (!passwordpost) {
             responses.push({ status: 400, message: "Password Invalid" });
             continue;
-        }
+        }*/
 
-        if (passwordpost !== POST_PASSWORD) {
+        /*if (passwordpost !== POST_PASSWORD) {
             responses.push({ status: 400, message: "Incorrect Password" });
             continue;
-        }
+        }*/
 
         try {
-            const infoexist = await Infos.findOne({ servicetag });
+            const infoexist = await Infos.findOne({ servicetag: servicetag });
 
             if (infoexist) {
                 const updateInfo = await Infos.findOneAndUpdate(
-                    { servicetag },
+                    { servicetag: servicetag },
                     { 
                         nome, usuario, modelo, versao,  
-                        windows, ip, processador, ram, disco, monitor, snmonitor, time 
+                        windows, ip, processador, ram, disco, monitor, snmonitor, time, programs 
                     },
                     { new: true }
                 );
@@ -52,7 +54,7 @@ app.post('/dbinfos', async (req, res) => {
             } else {
                 const newinfo = new Infos({
                     nome, usuario, servicetag, modelo, versao, 
-                    windows, ip, processador, ram, disco, monitor, snmonitor, time 
+                    windows, ip, processador, ram, disco, monitor, snmonitor, time, programs
                 });
                 await newinfo.save();
                 responses.push({ status: 201, data: newinfo });
@@ -118,7 +120,7 @@ app.post('/atualizar-documentos', async (req, res) => {
                     { $set: { seconds: newDuration, last_updated: new Date().toISOString() } }
                 );
                 
-                console.log(`Documento atualizado: ${page} para o usuário ${user} na data ${date}`);
+                //console.log(`Documento atualizado: ${page} para o usuário ${user} na data ${date}`);
                 responses.push({ status: 200, message: `Documento atualizado: ${page}` });
             } else {
                 // Criação usando modelo Mongoose
@@ -132,7 +134,7 @@ app.post('/atualizar-documentos', async (req, res) => {
 
                 await newDoc.save();
                 
-                console.log(`Novo documento inserido: ${page} para o usuário ${user} na data ${date}`);
+                //console.log(`Novo documento inserido: ${page} para o usuário ${user} na data ${date}`);
                 responses.push({ status: 201, message: `Novo documento inserido: ${page}` });
             }
         } catch (err) {
@@ -152,3 +154,5 @@ app.post('/atualizar-documentos', async (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor rodando em http://${SERVER_ADDRESS}:${port}`);
 });
+
+

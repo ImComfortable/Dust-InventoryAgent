@@ -16,7 +16,8 @@ pub struct Infos {
     pub monitor: String,
     pub snmonitor: String,
     pub time: String,
-    pub passwordpost: String,
+   // pub passwordpost: String,
+    pub programs: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -30,12 +31,15 @@ struct Payload {
 pub async fn sendinfos(info: Infos) -> Result<(), ()> {
     let client = reqwest::Client::new();
 
-    match client.post("http://192.168.1.99:3000/dbinfos")
+    match client.post("http://192.168.22.80:3000/dbinfos")
         .json(&info)
         .send()
         .await {
         Ok(_) => Ok(()),
-        Err(_) => Ok(())
+        Err(e) => {
+            println!("{:?}", e);
+            Err(())
+        }
     }
  }
 
@@ -51,6 +55,6 @@ pub async fn sendinfos(info: Infos) -> Result<(), ()> {
         .send()
         .await {
         Ok(_) => Ok(()),
-        Err(e) => Err(Box::new(e))
+        Err(_) => Ok(())
     }
 }
