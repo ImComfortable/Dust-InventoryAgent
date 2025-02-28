@@ -3,7 +3,6 @@ Build a powerful agent and platform that work together to automate inventory man
 
 # Site features:
 List all information from MongoDB in a table, with a change detector that will warn us if any critic component has changed.
-
 Audit system, which monitors all pages accessed by the user and the time he spent on them.
 
 # Agent features:
