@@ -3,43 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candeias T.I - Inventário de Ativos</title>
-    <link rel="stylesheet" type="text/css" href="inventory.css"/>
+    <title>Inventário de Ativos de T.I</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="inventory.css">
 </head>
 <body>
-    <div class="background"></div>
-    <header class="header">
-        <div class="logo">Candeias T.I</div>
-        <nav class="nav-menu">
-            <button class="nav-button active" id="inventory">Inventário</button>
+    <div class="claude-container">
+        <nav class="claude-sidebar">
+            <div class="sidebar-logo">
+                <h2>TI Asset</h2>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="nav-item active">
+                    <a href="index.html">
+                        <i class="fas fa-desktop"></i>
+                        <span>Ativos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="auditoria.html">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-cog"></i>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-details">
+                        <span class="user-name">Carlinhos 😎</span>
+                        <span class="user-role">Administrador</span>
+                    </div>
+                </div>
+            </div>
         </nav>
-        <button class="cta-button" id="logout">Logout</button>
-    </header>
-    <main class="main-content">
-        <h1>Inventário de Ativos</h1>
-        <div class="search-bar">
-            <input type="text" placeholder="Pesquisar ativos...">
-            <button>Buscar</button>
-        </div>
-        <div class="assets-table-container">
-            <table class="assets-table">
-                <thead>
-                    <tr>
-                        <th>Nome do PC</th>
-                        <th>Service Tag</th>
-                        <th>Usuario</th>
-                        <th>Opção</th>
-                        <th>Aviso</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-    </main>
+
+        <main class="claude-main">
+            <header class="main-header">
+                <h1>Inventário de Ativos</h1>
+                <div class="header-actions">
+                    <div class="search-wrapper">
+                        <input type="text" placeholder="Buscar ativos..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <button class="btn-primary">
+                        <i class="fas fa-plus"></i> Adicionar Ativo
+                    </button>
+                </div>
+            </header>
+
+            <div class="data-section">
+                <div class="card card-table">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome do PC</th>
+                                <th>Service Tag</th>
+                                <th>Usuário</th>
+                                <th>Opção</th>
+                                <th>Aviso</th>
+                            </tr>
+                        </thead>
+                        <tbody class="assets-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
     <div id="detailsModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"></div>
             <span class="close-button">&times;</span>
             <h2>Detalhes do Equipamento</h2>
             <div class="detail-grid">
@@ -68,7 +107,7 @@
                     <span id="modal-monitor"></span>
                 </div>
                 <div class="detail-item">
-                    <strong>Versão Windows:</strong>
+                    <strong>Windows:</strong>
                     <span id="modal-versao"></span>
                 </div>
                 <div class="detail-item">
@@ -96,7 +135,6 @@
     </div>
     <div id="pagesModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"></div>
             <span class="close-button">&times;</span>
             <h2>Histórico de Navegação do Usuário</h2>
             <div class="user-info">
@@ -117,9 +155,40 @@
             </div>
         </div>
     </div>
-</body>
-<script>
-    const CONFIG = {
+    <div id="warningModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Alterações do Equipamento</h2>
+            <div class="user-info">
+                <strong>Usuário:</strong> <span id="warning-usuario"></span>
+            </div>
+            <div class="pages-list-container">
+                <table class="pages-table">
+                    <thead>
+                        <tr>
+                            <th>Informação</th>
+                            <th>Valor Antigo</th>
+                            <th>Valor Novo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warning-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+        });
+
+        const CONFIG = {
         API_URL: 'http://192.168.22.80:8080',
         ROUTES: {
             INVENTORY: 'inventorypage.html'
@@ -145,7 +214,7 @@
             const data = await response.json();
             console.log("Dados recebidos:", data);
 
-            const tbody = document.querySelector(".assets-table tbody");
+            const tbody = document.querySelector(".assets-table");
             if (!tbody) {
                 console.error("Elemento tbody não encontrado!");
                 return;
@@ -173,36 +242,23 @@
                         showDetailsModal(item);
                     });
                     actioncell.appendChild(detailsbutton);
-
-                    const pagesbutton = document.createElement("button");
-                    pagesbutton.textContent = "Relatorio";
-                    pagesbutton.classList.add("relatorio-button");
-                    pagesbutton.addEventListener("click", () => {
-                        showDetailsPages(item);
-                    });
-                    actioncell.appendChild(pagesbutton);
                     row.appendChild(actioncell);
                 
                     const warningCell = document.createElement("td");
-                    const warningIcon = document.createElement("span");
-                    warningIcon.classList.add("warning-icon");
-                    warningIcon.textContent = "⚠";
+                    const warningIcon = document.createElement("i");
+                    warningIcon.classList.add("fas", "fa-square-check", "warning-icon");
                     if (item.warning) {
-                        warningIcon.classList.add("active");
+                       warningIcon.classList.add("active");
+                       warningIcon.addEventListener("click", async () => {
+                            const warnings = await fetchMongoDBData(item.servicetag);
+                            showWarningsModal(warnings, item.usuario);
+                       });
                     }
                     warningCell.appendChild(warningIcon);
                     row.appendChild(warningCell);
 
                     tbody.appendChild(row);
 
-                    warningIcon.addEventListener("mouseover", async () => {
-                        const warning = await fetchMongoDBData(item.servicetag);
-                        showTooltip(warningIcon, warning);
-                    });
-
-                    warningIcon.addEventListener("mouseout", () => {
-                        hideTooltip();
-                    });
                 });
                 console.log("Tabela preenchida com sucesso");
             } else {
@@ -232,45 +288,36 @@
 
     }
 
-    async function showDetailsPages(item) {
-    const usuario = item.usuario;
-    document.getElementById("pages-usuario").textContent = usuario || "N/A";
-    
-    try {
-        const response = await fetch(`${CONFIG.API_URL}/get_user_pages/${usuario}`);
-        if (!response.ok) {
-            throw new Error('Erro ao buscar histórico de navegação');
-        }
-        
-        const pagesData = await response.json();
-        const tbody = document.getElementById("pages-tbody");
-        tbody.innerHTML = "";
-        
-        if (Array.isArray(pagesData) && pagesData.length > 0) {
-            pagesData.forEach(page => {
-                const row = document.createElement("tr");
-                row.appendChild(createCell(page.title || "N/A"));
-                row.appendChild(createCell(page.date || "N/A"));
-                row.appendChild(createCell(formatTime(page.seconds)));
-                tbody.appendChild(row);
-            });
+    function showWarningsModal(warnings, usuario) {
+        const warningModal = document.getElementById("warningModal");
+        const warningModalContent = warningModal.querySelector(".modal-content");
+        const warningModalUser = warningModal.querySelector("#warning-usuario");
+        const warningTbody = warningModal.querySelector("#warning-tbody");
+
+        warningModalUser.textContent = usuario;
+
+        warningTbody.innerHTML = "";
+
+        if (warnings.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 3;
+            cell.textContent = "Nenhuma alteração encontrada";
+            cell.style.textAlign = "center";
+            row.appendChild(cell);
+            warningTbody.appendChild(row);
         } else {
-            const emptyRow = document.createElement("tr");
-            const emptyCell = document.createElement("td");
-            emptyCell.colSpan = 3;
-            emptyCell.textContent = "Nenhum histórico de navegação encontrado";
-            emptyCell.style.textAlign = "center";
-            emptyRow.appendChild(emptyCell);
-            tbody.appendChild(emptyRow);
+            warnings.forEach(warning => {
+                const row = document.createElement("tr");
+                row.appendChild(createCell(warning.Informação));
+                row.appendChild(createCell(warning.ValorAntigo));
+                row.appendChild(createCell(warning.NovoValor));
+                warningTbody.appendChild(row);
+            });
         }
-        
-        const modal = document.getElementById("pagesModal");
-        modal.style.display = "flex";
-    } catch (error) {
-        console.error('Erro ao buscar dados de navegação:', error);
-        alert('Erro ao carregar histórico de navegação');
+
+        warningModal.style.display = "flex";
     }
-}
 
     function createCell(value) {
         const cell = document.createElement("td");
@@ -309,37 +356,31 @@
         }
     }
 
-    function formatTime(seconds) {
-    if (!seconds && seconds !== 0) return "N/A";
-    const totalSeconds = Number(seconds);
-    
-    if (isNaN(totalSeconds)) return "N/A";
-    
-    if (totalSeconds < 60) {
-        return `${totalSeconds.toFixed(1)} segundos`;
-    } else if (totalSeconds < 3600) {
-        const minutes = totalSeconds / 60;
-        return `${minutes.toFixed(1)} minutos`;
-    } else {
-        const hours = totalSeconds / 3600;
-        return `${hours.toFixed(1)} horas`;
-    }
-    }
-
     window.onload = function() {
     console.log("Evento window.onload disparado");
     fetchInventoryData();
     
     const closeButtonDetails = document.querySelector("#detailsModal .close-button");
+    const closeButtonWarning = document.querySelector("#warningModal .close-button");
     const modalDetails = document.getElementById("detailsModal");
+    const modalWarning = document.getElementById("warningModal");
     
     closeButtonDetails.addEventListener("click", () => {
         modalDetails.style.display = "none";
+    });
+
+    closeButtonWarning.addEventListener("click", () => {
+        modalWarning.style.display = "none";
     });
     
     window.addEventListener("click", (event) => {
         if (event.target === modalDetails) {
             modalDetails.style.display = "none";
+        }
+    });
+    window.addEventListener("click", (event) => {
+        if (event.target === modalWarning) {
+            modalWarning.style.display = "none";
         }
     });
 
@@ -356,5 +397,6 @@
         }
     });
 };
-</script>
+    </script>
+</body>
 </html>
