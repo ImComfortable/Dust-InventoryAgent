@@ -22,7 +22,6 @@ Audit system, which monitors all pages accessed by the user and the time he spen
 # Features to think:
 
 - Stage validation, and improve all requests
-- Remake all website, put on a side bar to make it more floww
 - Build a MSI using WixToolSet to facilitate distribuition
 - secure all routes from website and implement a token system
 - Make a separed area to admin and gestors, gestors can login to view some reports and insights
