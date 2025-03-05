@@ -3,7 +3,6 @@ Build a powerful agent and platform that work together to automate inventory man
 
 # Site features:
 List all information from MongoDB in a table, with a change detector that will warn us if any critic component has changed.
-
 Audit system, which monitors all pages accessed by the user and the time he spent on them.
 
 # Agent features:
@@ -18,9 +17,12 @@ Audit system, which monitors all pages accessed by the user and the time he spen
 - Drive Type and Size
 - RAM
 - Restart Computer if it's online for more three days
+- Get all installed programs from computer
 
 # Features to think:
 
-- Get all installed programs for computer
-- Install and Uninstall programs with commands or options in agent site
-- stage validation
+- Stage validation, and improve all requests
+- Build a MSI using WixToolSet to facilitate distribuition
+- secure all routes from website and implement a token system
+- Make a separed area to admin and gestors, gestors can login to view some reports and insights
+  
