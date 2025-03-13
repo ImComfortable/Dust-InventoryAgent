@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário de Ativos de T.I</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="inventory.css">
+</head>
+<body>
+    <div class="claude-container">
+        <nav class="claude-sidebar">
+            <div class="sidebar-logo">
+                <h2>T.I Management</h2>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="nav-item active">
+                    <a href="index.html">
+                        <i class="fas fa-desktop"></i>
+                        <span>Ativos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="auditoria.html">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-cog"></i>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-details">
+                        <span class="user-name"></span>
+                        <span class="user-setor"></span>
+                        <span class="user-role"></span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="claude-main">
+            <header class="main-header">
+                <h1>Inventário de Ativos</h1>
+                <div class="header-actions">
+                    <div class="search-wrapper">
+                        <input type="text" placeholder="Buscar ativos..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="data-section">
+                <div class="card card-table">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome do PC</th>
+                                <th>Service Tag</th>
+                                <th>Usuário</th>
+                                <th>Opção</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="assets-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Detalhes do Equipamento</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <strong>Nome do PC:</strong>
+                    <span id="modal-nome"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Modelo:</strong>
+                    <span id="modal-modelo"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Service Tag:</strong>
+                    <span id="modal-servicetag"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Usuário:</strong>
+                    <span id="modal-usuario"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>S/N Monitor:</strong>
+                    <span id="modal-snmonitor"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Monitor:</strong>
+                    <span id="modal-monitor"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Windows:</strong>
+                    <span id="modal-versao"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Status Windows:</strong>
+                    <span id="modal-windows"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Tipo do Disco:</strong>
+                    <span id="modal-disco"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Processador:</strong>
+                    <span id="modal-processador"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Memória RAM:</strong>
+                    <span id="modal-ram"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>IP:</strong>
+                    <span id="modal-ip"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pagesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Histórico de Navegação do Usuário</h2>
+            <div class="user-info">
+                <strong>Usuário:</strong> <span id="pages-usuario"></span>
+            </div>
+            <div class="pages-list-container">
+                <table class="pages-table">
+                    <thead>
+                        <tr>
+                            <th>Página</th>
+                            <th>Data</th>
+                            <th>Tempo No Site</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pages-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="warningModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Alterações do Equipamento</h2>
+            <div class="user-info">
+                <strong>Usuário:</strong> <span id="warning-usuario"></span>
+            </div>
+            <div class="pages-list-container">
+                <table class="pages-table">
+                    <thead>
+                        <tr>
+                            <th>Informação</th>
+                            <th>Valor Antigo</th>
+                            <th>Valor Novo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warning-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+
+            const isAuthenticated = await isexpired();
+            if (isAuthenticated) {
+                await fetchInventoryData();
+                await loaduserInfos();
+                setInterval(fetchInventoryData, 2 * 60 * 1000);
+            }
+        });
+
+        const CONFIG = {
+            API_URL: 'http://192.168.22.80:8080',
+            ROUTES: {
+                INVENTORY: 'inventorypage.html'
+            }
+        };
+
+        async function fetchInventoryData() {
+            console.log("Função fetchInventoryData iniciada");
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/get_all_data`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Erro na requisição:', errorData);
+                    throw new Error(errorData.message || 'Erro ao buscar dados');
+                }
+
+                const data = await response.json();
+                console.log("Dados recebidos:", data);
+
+                const tbody = document.querySelector(".assets-table");
+                if (!tbody) {
+                    console.error("Elemento tbody não encontrado!");
+                    return;
+                }
+                console.log("Elemento tbody encontrado");
+
+                tbody.innerHTML = "";
+
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log("Dados são um array válido. Primeiro item:", data[0]);
+                    data.forEach((item, index) => {
+                        console.log(`Processando item ${index}:`, item);
+
+                        const row = document.createElement("tr");
+                        row.appendChild(createCell(item.nome || "N/A"));
+                        row.appendChild(createCell(item.servicetag || "N/A"));
+                        row.appendChild(createCell(item.usuario || "N/A"));
+
+                        const actioncell = document.createElement("td");
+
+                        const detailsbutton = document.createElement("button");
+                        detailsbutton.textContent = "Informações";
+                        detailsbutton.classList.add("details-button");
+                        detailsbutton.addEventListener("click", () => {
+                            showDetailsModal(item);
+                        });
+                        actioncell.appendChild(detailsbutton);
+                        row.appendChild(actioncell);
+                    
+                        const warningCell = document.createElement("td");
+                        const warningIcon = document.createElement("i");
+                        warningIcon.classList.add("fas", "fa-square-check", "warning-icon");
+                        if (item.warning) {
+                           warningIcon.classList.add("active");
+                           warningIcon.addEventListener("click", async () => {
+                                const warnings = await fetchMongoDBData(item.servicetag);
+                                showWarningsModal(warnings, item.usuario);
+                           });
+                        }
+                        warningCell.appendChild(warningIcon);
+                        row.appendChild(warningCell);
+
+                        tbody.appendChild(row);
+
+                    });
+                    console.log("Tabela preenchida com sucesso");
+                } else {
+                    console.error("Os dados recebidos não são um array válido:", data);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar ou processar dados:', error);
+            }
+        }
+
+        function showDetailsModal(item) {
+            document.getElementById("modal-nome").textContent = item.nome || "N/A";
+            document.getElementById("modal-modelo").textContent = item.modelo || "N/A";
+            document.getElementById("modal-servicetag").textContent = item.servicetag || "N/A";
+            document.getElementById("modal-usuario").textContent = item.usuario || "N/A";
+            document.getElementById("modal-snmonitor").textContent = item.snmonitor || "N/A";
+            document.getElementById("modal-monitor").textContent = item.monitor || "N/A";
+            document.getElementById("modal-versao").textContent = item.versao || "N/A";
+            document.getElementById("modal-windows").textContent = item.windows || "N/A";
+            document.getElementById("modal-disco").textContent = item.disco || "N/A";
+            document.getElementById("modal-processador").textContent = item.processador || "N/A";
+            document.getElementById("modal-ram").textContent = item.ram || "N/A";
+            document.getElementById("modal-ip").textContent = item.ip || "N/A";
+            
+            const modal = document.getElementById("detailsModal");
+            modal.style.display = "flex";
+        }
+
+        function showWarningsModal(warnings, usuario) {
+            const warningModal = document.getElementById("warningModal");
+            const warningModalContent = warningModal.querySelector(".modal-content");
+            const warningModalUser = warningModal.querySelector("#warning-usuario");
+            const warningTbody = warningModal.querySelector("#warning-tbody");
+
+            warningModalUser.textContent = usuario;
+
+            warningTbody.innerHTML = "";
+
+            if (warnings.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 3;
+                cell.textContent = "Nenhuma alteração encontrada";
+                cell.style.textAlign = "center";
+                row.appendChild(cell);
+                warningTbody.appendChild(row);
+            } else {
+                warnings.forEach(warning => {
+                    const row = document.createElement("tr");
+                    row.appendChild(createCell(warning.Informação));
+                    row.appendChild(createCell(warning.ValorAntigo));
+                    row.appendChild(createCell(warning.NovoValor));
+                    warningTbody.appendChild(row);
+                });
+            }
+
+            warningModal.style.display = "flex";
+        }
+
+        function createCell(value) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            return cell;
+        }
+
+        async function fetchMongoDBData(servicetag) {
+            const response = await fetch(`${CONFIG.API_URL}/get_warnings/${servicetag}`);
+            const data = await response.json();
+            return data;
+        }
+
+        function showTooltip(element, data) {
+            const tooltip = document.createElement("div");
+            tooltip.classList.add("tooltip");
+
+            if (data.length === 0) {
+                tooltip.textContent = "Nenhuma alteração encontrada";
+            } else {
+                tooltip.innerHTML = data.map(item => `<b>Alterações Realizadas</b><br><b>Coluna: </b>${item.Informação}</br><b>Valor Antigo: </b>${item.ValorAntigo}<br><b>Valor Novo: </b>${item.NovoValor}</br><br>`).join('\n');
+            }
+
+            document.body.appendChild(tooltip);
+
+            const rect = element.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + window.scrollX}px`;
+            tooltip.style.top = `${rect.bottom + window.scrollY}px`;
+            tooltip.style.display = "block";
+        }
+
+        function hideTooltip() {
+            const tooltip = document.querySelector(".tooltip");
+            if (tooltip) {
+                tooltip.remove();
+            }
+        }
+
+        async function isexpired() {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/verificar-sessao`, {
+                    credentials: "include"
+                });
+                const data = await response.json();
+                if (!data.autenticado) {
+                    window.location.href = '/login.html';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Erro ao verificar sessão:", error);
+                return false;
+            }
+        }
+
+        async function loaduserInfos() {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/user-info`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar informações do usuário');
+                }
+
+                const data = await response.json();
+
+                document.querySelector(".user-name").textContent = data.username;
+                document.querySelector(".user-role").textContent = data.role;
+                document.querySelector(".user-setor").textContent = data.setor;
+            } catch (error) {
+                console.error('Erro ao buscar informações do usuário:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -11,9 +12,39 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'static')));
 
-const mongoUrl = 'mongodb://agente:JolyneTheCat120207@192.168.1.99:27017/InfosPC';
-const dbName = 'InfosPC';
+//const mongoUrl = 'mongodb://agente:JolyneTheCat120207@192.168.1.99:27017/InfosPC';]
+const mongoUrl = 'mongodb://localhost:27017';
+const dbName = 'infosdb';
 let db;
+
+app.use(session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 3 * 60 * 1000
+    }
+}));
+
+function verifyauth(req, res, next) {
+    if (req.session.usuarioId) {
+        return next();
+    } else {
+        return res.redirect('/login.html');
+    }
+}
+
+app.get('/verificar-sessao', (req, res) => {
+    if (req.session && req.session.usuarioId) {
+      const tempoRestante = req.session.cookie.maxAge;
+      res.json({ 
+        autenticado: true, 
+        expirando: tempoRestante < 2 * 60 * 1000
+      });
+    } else {
+      res.json({ autenticado: false });
+    }
+  });
 
 async function connectToMongo() {
     try {
@@ -74,10 +105,10 @@ async function pollForChanges() {
 }
 
 app.get('/', (req, res) => {
-    res.redirect('/inventorypage.html');
+    res.redirect('/login.html');
 });
 
-app.get('/inventorypage.html', (req, res) => {
+app.get('/inventorypage.html',  verifyauth, (req, res) => {
     res.sendFile(path.join(__dirname, 'static', 'inventorypage.html'));
 });
 
@@ -105,7 +136,60 @@ app.get('/get_user_pages/:username', async (req, res) => {
     }
 });
 
+app.post('/auth', async (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
 
+    console.log('Usuário:', username);
+    console.log('Senha:', password);
+    try {
+        const collection = db.collection('logins');
+        const auth = await collection.findOne({ usuario: username, senha: password });
+
+        if (auth) {
+            req.session.usuarioId = 1;
+            req.session.username = req.body.username;
+            req.session.userRole = auth.role || 'Sem permissão';
+            console.log(auth.setor); 
+            req.session.userSetor = auth.setor || 'Sem setor';   
+            res.redirect('/inventorypage.html');
+        } else {
+            res.redirect('/login.html');
+        }
+    } catch (err) {
+        console.error('Erro ao autenticar usuário:', err);
+        res.status(500).json({ error: 'Erro ao autenticar usuário' });
+    }
+});
+
+app.get('/user-info', verifyauth, (req, res) => {
+    res.json({ username: req.session.username, role: req.session.userRole, setor: req.session.userSetor });
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/login.html');
+});
+
+app.get('/get_audits', async (req, res) => {
+    try {
+        const collection = db.collection('logins');
+        const audits = await collection.find({}).toArray();
+        res.json(audits);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao buscar dados de auditoria' });
+    }
+});
+
+app.get('/get_all_audict', async (req, res) => {
+    try {
+        const collection = db.collection('audit');
+        const documents = await collection.find({}).toArray();
+        res.json(documents);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao buscar dados de auditoria' });
+    }
+});
 
 app.get('/get_all_data', async (req, res) => {
     try {
@@ -130,7 +214,6 @@ app.get('/get_all_data', async (req, res) => {
 async function startServer() {
     const client = await connectToMongo();
     if (client) {
-        // Iniciar o polling para monitorar mudanças a cada 10 segundos
         setInterval(pollForChanges, 10000);
     }
     app.listen(PORT, HOST, () => {

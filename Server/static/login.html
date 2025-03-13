@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+        .warning-icon.active {
+            color: #f8260e;
+            animation: wiggle 0.6s ease-in-out 3;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-96">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Fazer Login</h1>
+            <p class="text-gray-500 mt-2">Bem-vindo de volta!</p>
+        </div>
+        <form action="/auth" method="post" id="loginForm" class="space-y-4">
+            <div>
+                <label for="username" class="block text-gray-700 mb-2">Usuário</label>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username"
+                        class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Digite o seu usuário"
+                        required
+                    >
+                    <i class="fas fa-user-circle absolute right-3 top-4 text-gray-400"></i>
+                </div>
+            </div>
+            <div>
+                <label for="password" class="block text-gray-700 mb-2">Senha</label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Digite sua senha"
+                        required
+                    >
+                    <i id="passwordToggle" class="fas fa-eye-slash absolute right-3 top-4 text-gray-400 cursor-pointer"></i>
+                </div>
+            </div>
+            <button 
+                type="submit" 
+                class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition duration-300">
+                Entrar
+            </button>
+        </form>
+    </div>
+    <script>
+        const passwordInput = document.getElementById('password');
+        const passwordToggle = document.getElementById('passwordToggle');
+
+        passwordToggle.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordToggle.classList.remove('fa-eye-slash');
+                passwordToggle.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                passwordToggle.classList.remove('fa-eye');
+                passwordToggle.classList.add('fa-eye-slash');
+            }
+        });
+
+        const loginForm = document.getElementById('loginForm');
+        loginForm.addEventListener('submit', function(event) {
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            
+            if (username.value.trim() === '') {
+                event.preventDefault();
+                username.classList.add('border-red-500');
+                const warningIcon = username.nextElementSibling;
+                warningIcon.classList.add('warning-icon', 'active');
+                setTimeout(() => {
+                    username.classList.remove('border-red-500');
+                    warningIcon.classList.remove('warning-icon', 'active');
+                }, 1500);
+                return;
+            }
+            
+            if (password.value.length < 4) {
+                event.preventDefault();
+                password.classList.add('border-red-500');
+                const warningIcon = password.nextElementSibling;
+                warningIcon.classList.add('warning-icon', 'active');
+                setTimeout(() => {
+                    password.classList.remove('border-red-500');
+                    warningIcon.classList.remove('warning-icon', 'active');
+                }, 1500);
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

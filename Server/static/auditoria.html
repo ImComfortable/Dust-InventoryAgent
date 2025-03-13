@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoria de Usuários</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="inventory.css">
+</head>
+<body>
+    <div class="claude-container">
+        <nav class="claude-sidebar">
+            <div class="sidebar-logo">
+                <h2>T.I Management</h2>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="nav-item">
+                    <a href="inventorypage.html">
+                        <i class="fas fa-desktop"></i>
+                        <span>Ativos</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="auditoria.html">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-cog"></i>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-details">
+                        <span class="user-name"></span>
+                        <span class="user-setor"></span>
+                        <span class="user-role"></span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="claude-main">
+            <div class="main-header">
+                <div>
+                    <h1>Auditoria de Usuários</h1>
+                    <p>Dashboard de monitoramento e análise de atividades</p>
+                </div>
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar por nome..." />
+                </div>
+            </div>
+            
+            <div class="container">
+                <div class="filters">
+                    <div class="filter-item active">Todos Usuários</div>
+                    <div class="filter-item">Departamento Financeiro</div>
+                    <div class="filter-item">Departamento TI</div>
+                    <div class="filter-item">Recursos Humanos</div>
+                    <div class="filter-item">Marketing</div>
+                </div>
+                
+                <div class="dashboard" id="userCards">
+                    <div class="no-results hidden" id="noResults">
+                        <i class="fas fa-search fa-3x" style="color: #ccc; margin-bottom: 1rem;"></i>
+                        <h3>Nenhum usuário encontrado</h3>
+                        <p>Tente outro termo de pesquisa ou limpe o campo para ver todos os usuários.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+async function fetchAuditData() {
+    try {
+        const response = await fetch('http://192.168.22.80:8080/get_all_audict', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar dados de auditoria');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Erro ao buscar dados de auditoria:', error);
+        return [];
+    }
+}
+
+// Função para gerar um card de usuário com base nos dados recebidos
+function gerarCardUsuario(usuario) {
+    const cardId = `card-${usuario.id}`;
+    const chartId = `chart-${usuario.id}`;
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-user', usuario.username);
+    card.setAttribute('data-dept', usuario.departamento || 'Não especificado');
+    
+    card.innerHTML = `
+        <div class="card-header">
+            ${usuario.username}${usuario.departamento ? ` - ${usuario.departamento}` : ''}
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="${chartId}"></canvas>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn">
+                    <i class="fas fa-history"></i>
+                    Histórico de Navegação
+                </button>
+                <button class="action-btn">
+                    <i class="fas fa-laptop-code"></i>
+                    Aplicativos Instalados
+                </button>
+                <button class="action-btn">
+                    <i class="fas fa-chart-line"></i>
+                    Análise Detalhada
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Função para processar os dados recebidos da API e obter as 3 páginas mais acessadas
+function processarDadosUsuario(dadosUsuario) {
+    const usuariosProcessados = [];
+    
+    // Para cada usuário nos dados recebidos
+    dadosUsuario.forEach((usuario, index) => {
+        // Agrupa os acessos por página
+        const paginasMap = new Map();
+        
+        if (usuario.pages && Array.isArray(usuario.pages)) {
+            // Conta as ocorrências de cada página
+            usuario.pages.forEach(pagina => {
+                // A página é uma string direta no array
+                if (typeof pagina === 'string') {
+                    if (paginasMap.has(pagina)) {
+                        paginasMap.set(pagina, paginasMap.get(pagina) + 1);
+                    } else {
+                        paginasMap.set(pagina, 1);
+                    }
+                }
+            });
+        }
+        
+        // Converte o Map para array e ordena por número de acessos (decrescente)
+        const paginasArray = Array.from(paginasMap.entries())
+        .map(([nome, acessos]) => ({ 
+        nome: truncarTexto(nome, 20), // Trunca os nomes longos
+        nomeCompleto: nome,  // Mantém o nome completo para tooltips
+        acessos 
+        }))
+        .sort((a, b) => b.acessos - a.acessos);
+        
+        // Pega as 3 páginas mais acessadas
+        const top3Paginas = paginasArray.slice(0, 3);
+        
+        // Se houver menos de 3 páginas, adiciona páginas fictícias para completar o gráfico
+        while (top3Paginas.length < 3) {
+            top3Paginas.push({ nome: "Sem dados", acessos: 0 });
+        }
+        
+        usuariosProcessados.push({
+            id: usuario.id || index + 1,
+            username: usuario.username || 'Usuário Desconhecido',
+            departamento: usuario.departamento || usuario.department,
+            paginasAcessadas: top3Paginas
+        });
+    });
+    
+    return usuariosProcessados;
+}
+
+// Função para criar o gráfico de pizza para cada card
+function criarGrafico(usuario) {
+    const chartId = `chart-${usuario.id}`;
+    const ctx = document.getElementById(chartId).getContext('2d');
+    
+    const labels = usuario.paginasAcessadas.map(pagina => pagina.nome);
+    const data = usuario.paginasAcessadas.map(pagina => pagina.acessos);
+    
+    // Cores pré-definidas para melhor consistência visual
+    const colors = [
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)'
+    ];
+    
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, data.length),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            return `${label}: ${value} acessos`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Função principal para carregar os dados e renderizar os cards
+async function carregarAuditoria() {
+    const userCardsContainer = document.getElementById('userCards');
+    const noResults = document.getElementById('noResults');
+    
+    // Mostra um indicador de carregamento
+    const loader = document.createElement('div');
+    loader.className = 'loader';
+    loader.innerHTML = '<i class="fas fa-spinner fa-spin fa-3x"></i><p>Carregando dados de auditoria...</p>';
+    userCardsContainer.insertBefore(loader, noResults);
+    
+    try {
+        // Busca os dados da API
+        const dadosAuditoria = await fetchAuditData();
+        
+        // Remove o loader
+        loader.remove();
+        
+        // Se não houver dados, mostra mensagem
+        if (!dadosAuditoria || dadosAuditoria.length === 0) {
+            noResults.classList.remove('hidden');
+            noResults.querySelector('h3').textContent = 'Nenhum dado de auditoria encontrado';
+            noResults.querySelector('p').textContent = 'Não há dados de usuários disponíveis para análise.';
+            return;
+        }
+        
+        // Processa os dados para obter as top 3 páginas por usuário
+        const usuariosProcessados = processarDadosUsuario(dadosAuditoria);
+        
+        // Limpa qualquer card existente (exceto o noResults)
+        const cardsExistentes = document.querySelectorAll('.card');
+        cardsExistentes.forEach(card => card.remove());
+        
+        // Cria e adiciona os cards para cada usuário
+        usuariosProcessados.forEach(usuario => {
+            const card = gerarCardUsuario(usuario);
+            userCardsContainer.insertBefore(card, noResults);
+        });
+        
+        // Inicializa os gráficos depois que os cards estiverem no DOM
+        usuariosProcessados.forEach(usuario => {
+            criarGrafico(usuario);
+        });
+        
+        // Configuração do filtro e pesquisa
+        configurarFiltrosEPesquisa(usuariosProcessados);
+        
+    } catch (error) {
+        console.error('Erro ao processar dados de auditoria:', error);
+        loader.remove();
+        
+        // Mostra mensagem de erro
+        noResults.classList.remove('hidden');
+        noResults.querySelector('h3').textContent = 'Erro ao carregar dados';
+        noResults.querySelector('p').textContent = 'Ocorreu um erro ao buscar ou processar os dados de auditoria. Tente novamente mais tarde.';
+    }
+}
+
+// Configurar filtros e pesquisa
+function configurarFiltrosEPesquisa(usuarios) {
+    // Obter departamentos únicos
+    const departamentos = ['Todos Usuários', ...new Set(usuarios
+        .map(u => u.departamento)
+        .filter(d => d && d !== 'Não especificado'))];
+    
+    // Limpar filtros existentes
+    const filtersContainer = document.querySelector('.filters');
+    filtersContainer.innerHTML = '';
+    
+    // Adicionar novos filtros baseados nos departamentos encontrados
+    departamentos.forEach((departamento, index) => {
+        const filterItem = document.createElement('div');
+        filterItem.className = 'filter-item' + (index === 0 ? ' active' : '');
+        filterItem.textContent = departamento;
+        filtersContainer.appendChild(filterItem);
+        
+        // Adicionar evento de clique
+        filterItem.addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            
+            // Atualizar item ativo
+            document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('active'));
+            filterItem.classList.add('active');
+            
+            // Filtrar cards
+            filtrarCards(departamento);
+        });
+    });
+    
+    // Configurar pesquisa
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
+        pesquisarUsuarios(this.value);
+    });
+}
+
+function truncarTexto(texto, maxCaracteres = 20) {
+    if (!texto) return '';
+    if (texto.length <= maxCaracteres) return texto;
+    return texto.slice(0, maxCaracteres) + '...';
+}
+
+// Função para filtrar cards por departamento
+function filtrarCards(departamento) {
+    const userCards = document.querySelectorAll('.card');
+    let visibleCount = 0;
+    
+    userCards.forEach(card => {
+        const dept = card.getAttribute('data-dept');
+        
+        if (departamento === 'Todos Usuários' || departamento === dept) {
+            card.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+    
+    // Mostrar ou ocultar mensagem de "sem resultados"
+    const noResults = document.getElementById('noResults');
+    if (visibleCount === 0) {
+        noResults.classList.remove('hidden');
+    } else {
+        noResults.classList.add('hidden');
+    }
+}
+
+// Função para pesquisar usuários
+function pesquisarUsuarios(termo) {
+    const searchTerm = termo.toLowerCase().trim();
+    const userCards = document.querySelectorAll('.card');
+    let visibleCount = 0;
+    
+    userCards.forEach(card => {
+        const userName = card.getAttribute('data-user').toLowerCase();
+        
+        if (userName.includes(searchTerm) || searchTerm === '') {
+            card.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+    
+    // Mostrar ou ocultar mensagem de "sem resultados"
+    const noResults = document.getElementById('noResults');
+    if (visibleCount === 0 && searchTerm !== '') {
+        noResults.classList.remove('hidden');
+    } else {
+        noResults.classList.add('hidden');
+    }
+}
+
+// Iniciar o carregamento quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    carregarAuditoria();
+    loaduserInfos(); // Manter a função existente para carregar informações do usuário logado
+});
+
+        async function loaduserInfos() {
+            try {
+                const response = await fetch(`http://192.168.22.80:8080/user-info`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar informações do usuário');
+                }
+
+                const data = await response.json();
+
+                document.querySelector(".user-name").textContent = data.username;
+                document.querySelector(".user-role").textContent = data.role;
+                document.querySelector(".user-setor").textContent = data.setor;
+            } catch (error) {
+                console.error('Erro ao buscar informações do usuário:', error);
+            }
+        }
+    </script>
+</body>
+</html>

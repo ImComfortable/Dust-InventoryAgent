@@ -77,35 +77,39 @@ const infoschema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    programs: {
-        type: [String],
-        required: true,
-    },
 });
 
-const pagesSchema = new mongoose.Schema({
-    user: {
-        type: String,
-        required: true,
+const UserSchema = new mongoose.Schema({
+    username: { 
+      type: String, 
+      required: true,
+      unique: true
     },
-    title: {
-        type: String,
-        required: true,
+    setor: {
+      type: String,
+      default: 'Não informado'
     },
-    date: {
-        type: String,
-        required: true,
-    },
-    seconds: {
+    aplicativos: {
+        type: [String],
+        default: []
+      },
+    pages: [{
+      title: String,
+      seconds: {
         type: Number,
-        required: true,
-    },
-})
+        default: 0
+      },
+      last_updated: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+  }); 
 
 const Infos = mongoose.model("infos", infoschema);
-const Pages = mongoose.model("pages", pagesSchema);
+const User = mongoose.model("user", UserSchema);
 
 module.exports = {
     Infos,
-    Pages
+    User
 }
