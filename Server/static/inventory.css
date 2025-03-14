@@ -539,6 +539,8 @@ header {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: visible;
 }
 
 .card:hover {
@@ -610,4 +612,15 @@ header {
 
 .hidden {
     display: none !important;
+}
+
+#chartjs-tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap; /* Evita quebra de linha no tooltip */
 }

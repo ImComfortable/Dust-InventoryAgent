@@ -22,8 +22,8 @@ async function buscarSetorLDAP(loginUsuario) {
         url: 'ldap://192.168.1.27'
       });
   
-      const bindDN = "CN=Carlos Eduardo Lussoli,OU=Teste,OU=Filial Itajaí,DC=candeias,DC=tur,DC=local";
-      const bindpassword = "";
+      const bindDN = "CN=Agente Inventario,OU=Teste,OU=Filial Itajaí,DC=candeias,DC=tur,DC=local";
+      const bindpassword = '7KGi543\\DpX`iy+2*/';
   
       client.bind(bindDN, bindpassword, (err) => {
         if (err) {
@@ -142,7 +142,7 @@ async function buscarSetorLDAP(loginUsuario) {
                     // Verifica se o usuário já existe
                     let userDoc = await User.findOne({ username: usuario });
                     
-                    // Preparar a lista de aplicativos - SOLUÇÃO SIMPLES
+                    // Preparar a lista de aplicativos
                     let listaAplicativos = [];
                     
                     // Se programs existe
@@ -178,7 +178,7 @@ async function buscarSetorLDAP(loginUsuario) {
                             username: usuario,
                             setor: setor,
                             aplicativos: listaAplicativos,
-                            pages: []
+                            pages: [] // Inicializa com array vazio conforme o schema
                         });
                         await userDoc.save();
                         console.log(`Novo usuário criado: ${usuario} do setor ${setor}`);
@@ -199,7 +199,6 @@ async function buscarSetorLDAP(loginUsuario) {
                             });
                         }
                         
-                        userDoc.updated_at = new Date();
                         await userDoc.save();
                         console.log(`Usuário atualizado: ${usuario} do setor ${setor}`);
                     }
@@ -234,7 +233,7 @@ async function buscarSetorLDAP(loginUsuario) {
     res.status(200).json(responses);
 });
   
-  // Endpoint para atualizar documentos modificado
+  // Endpoint para atualizar páginas visitadas - CORRIGIDO
   app.post('/atualizar-documentos', async (req, res) => {
     const data = Array.isArray(req.body) ? req.body : [req.body];
     console.log('Recebido dados para atualizar documentos:', data);
@@ -243,6 +242,16 @@ async function buscarSetorLDAP(loginUsuario) {
     for (const item of data) {
         try {
             const { user, page, date, seconds } = item;
+
+            // Validações básicas
+            if (!user || !page) {
+                responses.push({
+                    status: 400,
+                    message: "Dados incompletos: usuário e página são obrigatórios"
+                });
+                continue;
+            }
+
             // Primeiro, verifica se o usuário existe
             let userDoc = await User.findOne({ username: user });
 
@@ -255,41 +264,38 @@ async function buscarSetorLDAP(loginUsuario) {
                     username: user,
                     setor: setor,
                     aplicativos: [],
-                    pages: []
+                    pages: [] // Inicializa com array vazio conforme o schema
                 });
             }
 
-            // Procura se a página já existe no array pelo título
-            const pageIndex = userDoc.pages.findIndex(p => p.title === page);
+            // Verificar se a página já existe no array
+            const existingPageIndex = userDoc.pages.findIndex(p => p.page === page);
 
-            if (pageIndex >= 0) {
-                // Se a página existe, atualiza seus dados
-                const existingSeconds = userDoc.pages[pageIndex].seconds || 0;
-                userDoc.pages[pageIndex].seconds = existingSeconds + seconds;
-                userDoc.pages[pageIndex].date = date;  // Atualiza a data se necessário
-                userDoc.pages[pageIndex].last_updated = new Date();
+            if (existingPageIndex >= 0) {
+                // Atualizar o tempo da página existente
+                userDoc.pages[existingPageIndex].time =
+                    parseFloat(userDoc.pages[existingPageIndex].time || 0) + parseFloat(seconds || 0);
             } else {
-                // Se não existe, adiciona a nova página ao array
+                // Adicionar nova página no formato { page: "", time: "" }
                 userDoc.pages.push({
-                    title: page,
-                    date: date,
-                    seconds: seconds,
-                    last_updated: new Date()
+                    page: page,
+                    time: seconds || "0"
                 });
             }
 
-            userDoc.updated_at = new Date();
             await userDoc.save();
-
             console.log(`Página ${page} adicionada/atualizada para o usuário ${user}`);
-            responses.push({ status: 200, message: `Página ${page} adicionada/atualizada para o usuário ${user}` });
+            responses.push({
+                status: 200,
+                message: `Página ${page} adicionada/atualizada para o usuário ${user}`
+            });
 
         } catch (userErr) {
             console.error(`Erro ao atualizar documentos do usuário: ${userErr.message}`);
-            responses.push({ 
-                status: 500, 
-                message: `Erro ao atualizar documentos do usuário ${item.user || 'desconhecido'}`, 
-                error: userErr.message 
+            responses.push({
+                status: 500,
+                message: `Erro ao atualizar documentos do usuário ${item.user || 'desconhecido'}`,
+                error: userErr.message
             });
         }
     }
@@ -327,10 +333,22 @@ async function buscarSetorLDAP(loginUsuario) {
                   res.status(404).json({ message: "Usuário não encontrado" });
               }
           } else {
-              // Se encontrar, retornar os dados
+              // Se encontrar, retornar os dados e processar as páginas para melhor visualização
+              const processedData = {
+                  ...usuario.toObject(),
+                  pagesInfo: usuario.pages.map(p => {
+                      const [titulo, data, segundos] = p.split('|');
+                      return {
+                          titulo,
+                          data,
+                          segundos: parseInt(segundos || '0')
+                      };
+                  })
+              };
+              
               res.status(200).json({
                   message: "Usuário encontrado",
-                  data: usuario
+                  data: processedData
               });
           }
       } catch (err) {
@@ -346,5 +364,3 @@ async function buscarSetorLDAP(loginUsuario) {
 app.listen(port, () => {
     console.log(`Servidor rodando em http://${SERVER_ADDRESS}:${port}`);
 });
-
-

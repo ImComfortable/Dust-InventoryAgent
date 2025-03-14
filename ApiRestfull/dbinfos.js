@@ -93,17 +93,12 @@ const UserSchema = new mongoose.Schema({
         type: [String],
         default: []
       },
-    pages: [{
-      title: String,
-      seconds: {
-        type: Number,
-        default: 0
-      },
-      last_updated: {
-        type: Date,
-        default: Date.now
-      }
-    }],
+    pages: [
+        {
+            page: { type: String, required: true },
+            time: { type: Number, default: 0 }
+        }
+    ],
   }); 
 
 const Infos = mongoose.model("infos", infoschema);

@@ -183,7 +183,7 @@ app.get('/get_audits', async (req, res) => {
 
 app.get('/get_all_audict', async (req, res) => {
     try {
-        const collection = db.collection('audit');
+        const collection = db.collection('users');
         const documents = await collection.find({}).toArray();
         res.json(documents);
     } catch (err) {
