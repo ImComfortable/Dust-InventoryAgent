@@ -1,9 +1,7 @@
 # Main purpose
-Build a powerful agent and platform that work together to automate inventory management, manege asset and generate insightful reports.
+Build a simple agent who can be integraded with a platform, and work together to automate inventory management, manege asset and give us a help in audict.
 
-# Site features:
-List all information from MongoDB in a table, with a change detector that will warn us if any critic component has changed.
-Audit system, which monitors all pages accessed by the user and the time he spent on them.
+I already make a "plataform", is simple, but usefull: 
 
 # Agent features:
 - PC Model
