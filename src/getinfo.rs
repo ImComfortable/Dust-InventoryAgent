@@ -348,9 +348,13 @@ pub async fn getwindows() {
             GetWindowTextW(hwnd, title.as_mut_ptr() as LPWSTR, length + 1);
         }
 
-        let current_title = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
+        let mut current_title = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
 
         if current_title.contains("Firefox") || current_title.contains("Google Chrome") || current_title.contains("Microsoft Edge") || current_title.contains("Brave") {
+            let browsers = vec!["Mozilla Firefox", "Google Chrome", "Microsoft Edge", "Brave"];
+            for browser in browsers.iter() {
+                current_title = current_title.replace(browser, "").trim().to_string();
+            }
             if last_window.as_ref() != Some(&current_title) {
                 if let Some(last) = last_window.clone() {
                     let elapsed = start_time.elapsed();
