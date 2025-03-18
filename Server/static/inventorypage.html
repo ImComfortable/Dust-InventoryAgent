@@ -176,6 +176,36 @@
         </div>
     </div>
     <script>
+    async function verificarsessão() {
+        try{
+            
+            const response = await fetch(`${CONFIG.API_URL}/verificar-sessao`, {
+                credentials: "include"
+            });
+            const data = await response.json();
+
+            if (!data.autenticado) {
+                window.location.replace = '/login.html';
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error("Erro ao verificar sessão:", error);
+            window.location.replace = '/login.html';
+            return false;
+            }
+        }
+
+        (async function() {
+            document.documentElement.style.display = 'none';
+
+            const autenticado = await verificarsessão();
+
+            if (autenticado)
+                document.documentElement.style.display = 'block';
+        
+        })();
+
         document.addEventListener('DOMContentLoaded', async () => {
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => {
@@ -192,13 +222,6 @@
                 setInterval(fetchInventoryData, 2 * 60 * 1000);
             }
         });
-
-        const CONFIG = {
-            API_URL: 'http://192.168.22.80:8080',
-            ROUTES: {
-                INVENTORY: 'inventorypage.html'
-            }
-        };
 
         async function fetchInventoryData() {
             console.log("Função fetchInventoryData iniciada");
@@ -326,7 +349,7 @@
 
         function createCell(value) {
             const cell = document.createElement("td");
-            cell.textContent = value;
+            cell.textContent = DOMPurify.sanitize(value);
             return cell;
         }
 

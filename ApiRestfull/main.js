@@ -241,7 +241,7 @@ async function buscarSetorLDAP(loginUsuario) {
 
     for (const item of data) {
         try {
-            const { user, page, date, seconds } = item;
+            const { user, page, seconds } = item;
 
             // Validações básicas
             if (!user || !page) {

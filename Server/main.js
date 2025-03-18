@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const session = require('express-session');
 const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
@@ -17,6 +18,8 @@ const mongoUrl = 'mongodb://localhost:27017';
 const dbName = 'infosdb';
 let db;
 
+console.log(process.env.TESTE);
+
 app.use(session({
     secret: "secret",
     resave: false,
@@ -33,6 +36,15 @@ function verifyauth(req, res, next) {
         return res.redirect('/login.html');
     }
 }
+
+app.get('/config', (req, res) => {
+    res.json({ 
+        API_URL: process.env.API_URL, 
+        ROUTES: {
+              INVENTORY: 'inventorypage.html'
+    }
+  });
+});
 
 app.get('/verificar-sessao', (req, res) => {
     if (req.session && req.session.usuarioId) {

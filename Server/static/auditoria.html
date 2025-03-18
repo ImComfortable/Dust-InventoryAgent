@@ -77,7 +77,77 @@
         </div>
     </div>
     <script>
-async function fetchAuditData() {
+    const CONFIG = {
+            API_URL: 'http://192.168.22.80:8080',
+            ROUTES: {
+                INVENTORY: 'inventorypage.html'
+            }
+        };
+
+       async function verificarsessão() {
+        try{
+            const response = await fetch(`${CONFIG.API_URL}/verificar-sessao`, {
+                credentials: "include"
+            });
+            const data = await response.json();
+
+            if (!data.autenticado) {
+                window.location.replace = '/login.html';
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error("Erro ao verificar sessão:", error);
+            window.location.replace = '/login.html';
+            return false;
+            }
+        }
+
+        (async function() {
+            document.documentElement.style.display = 'none';
+
+            const autenticado = await verificarsessão();
+
+            if (autenticado)
+                document.documentElement.style.display = 'block';
+        
+        })();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+
+            const isAuthenticated = await isexpired();
+            if (isAuthenticated) {
+                await fetchInventoryData();
+                await loaduserInfos();
+                setInterval(fetchInventoryData, 2 * 60 * 1000);
+            }
+        });
+
+        async function isexpired() {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/verificar-sessao`, {
+                    credentials: "include"
+                });
+                const data = await response.json();
+                if (!data.autenticado) {
+                    window.location.href = '/login.html';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Erro ao verificar sessão:", error);
+                return false;
+            }
+        }
+
+    async function fetchAuditData() {
     try {
         const response = await fetch('http://192.168.22.80:8080/get_all_audict', {
             method: 'GET',
@@ -108,7 +178,7 @@ function gerarCardUsuario(usuario) {
     
     card.innerHTML = `
         <div class="card-header">
-            ${usuario.username}${usuario.departamento ? ` - ${usuario.departamento}` : ''}
+            ${usuario.username.toUpperCase()}${usuario.departamento ? ` - ${usuario.departamento}` : ''}
         </div>
         <div class="card-body">
             <div class="chart-container">

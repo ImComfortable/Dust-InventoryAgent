@@ -351,7 +351,7 @@ pub async fn getwindows() {
         let mut current_title = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
 
         if current_title.contains("Firefox") || current_title.contains("Google Chrome") || current_title.contains("Microsoft Edge") || current_title.contains("Brave") {
-            let browsers = vec!["Mozilla Firefox", "Google Chrome", "Microsoft Edge", "Brave"];
+            let browsers = vec!["Mozilla ", "Chrome ", "Microsoft ", "Brave"];
             for browser in browsers.iter() {
                 current_title = current_title.replace(browser, "").trim().to_string();
             }
@@ -370,6 +370,7 @@ pub async fn getwindows() {
         thread::sleep(Duration::from_secs(1));
     }
 }
+
 async fn send_to_mongo(window_title: &str, duration: Duration) -> Result<(), Box<dyn std::error::Error>> {
     let current_date = Local::now().format("%d-%m-%Y").to_string();
     let seconds = duration.as_secs_f64();
