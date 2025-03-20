@@ -1,5 +1,5 @@
 # Main purpose
-Build a simple agent who can be integraded with a platform, and work together to automate inventory management, manege asset and give us a help in audict.
+Build a simple agent who can be integraded with a platform, and work together to automate inventory management and give us a help in audict.
 
 I already make a "plataform", is simple, but usefull: 
 
