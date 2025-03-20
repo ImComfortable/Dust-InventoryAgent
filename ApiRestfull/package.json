@@ -1,6 +1,20 @@
 {
+  "name": "inventory-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js"
+  },
   "dependencies": {
-    "express": "^4.21.2",
-    "mongoose": "^8.9.5"
+    "express": "^4.18.2",
+    "mongoose": "^6.8.0",
+    "helmet": "^6.0.1",
+    "morgan": "^1.10.0",
+    "express-rate-limit": "^6.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "ldapjs": "^2.3.3"
   }
 }

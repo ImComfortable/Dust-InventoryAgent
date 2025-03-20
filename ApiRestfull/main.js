@@ -5,15 +5,18 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import './configAD';
-import { Infos, User } from './dbinfos';
+import search from './configAD.js';
+import db from './dbinfos.js';
+const { buscarSetorLDAP } = search;
+const { Infos, User } = db;
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
+const password = process.env.API_PASSWORD;
 const MONGODB_URI = process.env.MONGODB_URI;
-const SERVER_ADDRESS = process.env.SERVER_ADDRESS || '192.168.22.80';
+const SERVER_ADDRESS = process.env.SERVER_ADDRESS;
 
 app.use(helmet());
 app.use(morgan('combined'));
@@ -89,20 +92,26 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
   try {
     for (const item of data) {
       const { 
-        passwordpost, nome, usuario, servicetag, modelo, versao,
+        apiauth, nome, usuario, servicetag, modelo, versao,
         windows, ip, processador, ram, disco, monitor, snmonitor, time, programs 
       } = item;
 
-      // Validação básica
-      if (!servicetag) {
-        responses.push({ status: 400, message: 'Service Tag é obrigatório' });
-        continue;
+      console.log('Recebido:', item);
+
+      if (!servicetag || !apiauth) {
+        responses.push({ status: 400, message: 'Autenticação obrigatoria!' });
+        return;
+      }
+
+      if (!apiauth == password) {
+        responses.push({ status: 401, message: 'Autenticação Falsa' });
+        return;
       }
 
       console.log(`Processando informações para: ${servicetag} (${usuario || 'usuário não informado'})`);
       
       try {
-        const infoexist = await Infos.findOne({ servicetag });
+        const infoexist = await Infos.findOne({ servicetag: servicetag });
         let computerResponse;
 
         if (infoexist) {
@@ -130,7 +139,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         if (usuario) {
             try {
             let userDoc = await User.findOne({ username: usuario });
-            const setor = await buscarSetorLDAP(usuario);
+            const setor = await search(usuario);
             const listaAplicativos = processarListaProgramas(programs);
 
             if (!userDoc) {

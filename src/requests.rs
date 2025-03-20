@@ -33,7 +33,7 @@ pub struct Infos {
     pub monitor: String,
     pub snmonitor: String,
     pub time: String,
-    // pub passwordpost: String,
+    pub apiauth: String,
     pub programs: Vec<String>,
 }
 
