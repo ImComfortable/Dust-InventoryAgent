@@ -1,6 +1,6 @@
 import ldapjs from 'ldapjs';
 
-async function buscarSetorLDAP(loginUsuario) {
+ export  default async function buscarSetorLDAP(loginUsuario) {
     if (!loginUsuario) {
         console.log('Login do usuário não informado');
         return 'Não informado';
@@ -89,4 +89,4 @@ async function buscarSetorLDAP(loginUsuario) {
     });
 }
 
-export default buscarSetorLDAP;
+// Removed duplicate default export

@@ -96,7 +96,8 @@ const UserSchema = new Schema({
     pages: [
         {
             page: { type: String, required: true },
-            time: { type: Number, default: 0 }
+            time: { type: Number, default: 0 },
+            date: { type: Date, default: Date.now }
         }
     ],
   }); 

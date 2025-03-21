@@ -37,12 +37,13 @@ pub struct Infos {
     pub programs: Vec<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct Payload {
     user: String,
     page: String,
     date: String,
     seconds: f64,
+    apiauth: String,
 }
 
 pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
@@ -66,7 +67,7 @@ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), B
 
     let user = get_username();
 
-    let payload = Payload { user, page, date, seconds };
+    let payload = Payload { user, page, date, seconds, apiauth: "JolyneTheCat120207.18".to_string() };
 
     match client.post("http://192.168.22.80:3000/atualizar-documentos")
         .json(&payload)

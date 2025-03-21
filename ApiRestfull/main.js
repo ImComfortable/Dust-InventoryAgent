@@ -7,7 +7,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import search from './configAD.js';
 import db from './dbinfos.js';
-const { buscarSetorLDAP } = search;
+import buscarSetorLDAP from './configAD.js';
 const { Infos, User } = db;
 
 dotenv.config();
