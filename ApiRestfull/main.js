@@ -96,8 +96,6 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         windows, ip, processador, ram, disco, monitor, snmonitor, time, programs 
       } = item;
 
-      console.log('Recebido:', item);
-
       if (!servicetag || !apiauth) {
         responses.push({ status: 400, message: 'Autenticação obrigatoria!' });
         return;

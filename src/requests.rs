@@ -57,7 +57,7 @@ pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
         Err(e) => {
             let error_msg = format!("Erro ao enviar informações: {:?}", e);
             log_error(&error_msg);
-            Err(Box::new(ApiError { message: error_msg }))
+            Ok(())
         }
     }
 }
@@ -77,7 +77,7 @@ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), B
         Err(e) => {
             let error_msg = format!("Erro ao enviar informações de página: {:?}", e);
             log_error(&error_msg);
-            Err(Box::new(ApiError { message: error_msg }))
+            Ok(())
         }
     }
 }
