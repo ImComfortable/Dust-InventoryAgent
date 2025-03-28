@@ -105,10 +105,20 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         responses.push({ status: 401, message: 'Autenticação Falsa' });
         return;
       }
-
-      console.log(`Processando informações para: ${servicetag} (${usuario || 'usuário não informado'})`);
-      
+    
       try {
+
+        let setor;
+
+        if(usuario) {
+          if(usuario.includes(".")) {
+            setor = await search(usuario);
+          } else {
+            setor = usuario.replace(/candeias/gi, "".trim());
+          }
+        } else {
+          setor = 'Não informado'
+        }
         const infoexist = await Infos.findOne({ servicetag: servicetag });
         let computerResponse;
 
@@ -117,7 +127,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
             { servicetag },
             { 
               nome, usuario, modelo, versao,  
-              windows, ip, processador, ram, disco, monitor, snmonitor, time,
+              windows, ip, processador, ram, disco, monitor, snmonitor, time, setor,
               ultimaAtualizacao: new Date()
             },
             { new: true }
@@ -126,7 +136,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         } else {
           const newinfo = new Infos({
             nome, usuario, servicetag, modelo, versao, 
-            windows, ip, processador, ram, disco, monitor, snmonitor, time,
+            windows, ip, processador, ram, disco, monitor, snmonitor, time, setor,
             dataCriacao: new Date(),
             ultimaAtualizacao: new Date()
           });
@@ -137,7 +147,6 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         if (usuario) {
             try {
             let userDoc = await User.findOne({ username: usuario });
-            const setor = await search(usuario);
             const listaAplicativos = processarListaProgramas(programs);
 
             if (!userDoc) {
@@ -146,8 +155,6 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
                 setor: setor,
                 aplicativos: listaAplicativos,
                 pages: [],
-                dataCriacao: new Date(),
-                ultimaAtualizacao: new Date()
               });
               await userDoc.save();
               console.log(`Novo usuário criado: ${usuario} do setor ${setor}`);
@@ -215,7 +222,6 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
 
 app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
   const data = Array.isArray(req.body) ? req.body : [req.body];
-  console.log('Recebido dados para atualizar documentos:', data.length, 'itens');
   const responses = [];
 
   try {
@@ -273,7 +279,6 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
         }
 
         await userDoc.save();
-        console.log(`Página ${page} adicionada/atualizada para o usuário ${user}`);
         responses.push({
           status: 200,
           message: `Página ${page} adicionada/atualizada para o usuário ${user}`,

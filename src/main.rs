@@ -11,7 +11,7 @@ mod requests;
 #[tokio::main]
 async fn main() {
     let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(10);
+    let mongodb_interval = Duration::from_secs(30);
 
     tokio::spawn(async {
         getwindows().await;

@@ -370,7 +370,6 @@ pub async fn getwindows() {
         thread::sleep(Duration::from_secs(1));
     }
 }
-
 async fn send_to_mongo(window_title: &str, duration: Duration) -> Result<(), Box<dyn std::error::Error>> {
     let current_date = Local::now().format("%d-%m-%Y").to_string();
     let seconds = duration.as_secs_f64();

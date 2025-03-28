@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, set } from 'mongoose';
 
 const infoschema = new Schema({
     nome: {
@@ -72,6 +72,10 @@ const infoschema = new Schema({
             },
             message: 'Nome de usuário não permitido.'
         },
+    },
+    setor: {
+        type: String,
+        required: true,
     },
     ip: {
         type: String,
