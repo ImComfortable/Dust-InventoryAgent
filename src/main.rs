@@ -1,4 +1,4 @@
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 use crate::getinfo::*;
 use crate::requests::*;
@@ -11,7 +11,7 @@ mod requests;
 #[tokio::main]
 async fn main() {
     let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(30);
+    let mongodb_interval = Duration::from_secs(10);
 
     tokio::spawn(async {
         getwindows().await;
@@ -30,8 +30,8 @@ async fn main() {
                 disco: get_disks(),
                 processador: get_processador(),
                 ram: get_total_ram(),
-                monitor: get_monitor().expect("Sem monitor"),
-                snmonitor: get_serialnumbermonitor().expect("Sem monitor"),
+                monitor: get_monitor().unwrap_or_else(|_| "Monitor não encontrado".to_string()),
+                snmonitor: get_serialnumbermonitor().unwrap_or_else(|_| "Monitor não encontrado".to_string()),
                 time: time_now(),
                 apiauth: "JolyneTheCat120207.18".to_string(),
                 programs: get_programs(),
