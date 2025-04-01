@@ -228,12 +228,12 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
   try {
     for (const item of data) {
       try {
-        const { user, page, seconds } = item;
+        const { user, page, seconds, date } = item;
 
-        if (!user || !page) {
+        if (!user || !page || !date) {
           responses.push({
             status: 400,
-            message: "Dados incompletos: usuário e página são obrigatórios"
+            message: "Dados incompletos: usuário, página e data são obrigatórios"
           });
           continue;
         }
@@ -247,9 +247,11 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
           continue;
         }
 
+        // Buscar o documento do usuário
         let userDoc = await User.findOne({ username: user });
 
         if (!userDoc) {
+          // Criar um novo documento para o usuário, se não existir
           const setor = await buscarSetorLDAP(user);
 
           userDoc = new User({
@@ -257,29 +259,37 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
             setor: setor,
             aplicativos: [],
             pages: [],
-            dataCriacao: new Date(),
-            ultimaAtualizacao: new Date()
           });
-        } else {
-          userDoc.ultimaAtualizacao = new Date();
         }
 
-        const existingPageIndex = userDoc.pages.findIndex(p => p.page === page);
+        // Verificar se já existe uma página com a mesma data
+        const existingPageIndex = userDoc.pages.findIndex(p => {
+          if (!p.date || isNaN(new Date(p.date).getTime())) {
+            return false; // Ignorar entradas com `date` inválido
+          }
+
+          // Comparar `page` e `date` no mesmo formato
+          const pageDate = p.date; // Já está no formato simples (DD-MM-YYYY)
+          return p.page === page && pageDate === date;
+        });
 
         if (existingPageIndex >= 0) {
+          // Atualizar o documento existente
           const currentTime = parseFloat(userDoc.pages[existingPageIndex].time || 0);
           userDoc.pages[existingPageIndex].time = currentTime + parsedSeconds;
-          userDoc.pages[existingPageIndex].ultimoAcesso = new Date();
         } else {
+          // Criar um novo documento para a página com a nova data
           userDoc.pages.push({
             page: page,
             time: parsedSeconds,
-            dataCriacao: new Date(),
-            ultimoAcesso: new Date()
+            date: date, // Salvar a data no formato simples (DD-MM-YYYY)
+            _id: new mongoose.Types.ObjectId() // Gerar um novo _id para o subdocumento
           });
         }
 
+        // Salvar as alterações no banco de dados
         await userDoc.save();
+
         responses.push({
           status: 200,
           message: `Página ${page} adicionada/atualizada para o usuário ${user}`,

@@ -49,7 +49,7 @@ struct Payload {
 pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
     let client = reqwest::Client::new();
 
-    match client.post("http://192.168.1.99:3000/dbinfos")
+    match client.post("http://192.168.22.80:3000/dbinfos")
         .json(&info)
         .send()
         .await {
@@ -69,7 +69,7 @@ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), B
 
     let payload = Payload { user, page, date, seconds, apiauth: "JolyneTheCat120207.18".to_string() };
 
-    match client.post("http://192.168.1.99:3000/atualizar-documentos")
+    match client.post("http://192.168.22.80:3000/atualizar-documentos")
         .json(&payload)
         .send()
         .await {

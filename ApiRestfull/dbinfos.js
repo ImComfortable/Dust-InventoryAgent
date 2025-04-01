@@ -101,7 +101,7 @@ const UserSchema = new Schema({
         {
             page: { type: String, required: true },
             time: { type: Number, default: 0 },
-            date: { type: Date, default: Date.now }
+            date: { type: String, required: true}
         }
     ],
   }); 
