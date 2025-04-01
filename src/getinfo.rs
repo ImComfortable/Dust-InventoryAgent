@@ -329,33 +329,40 @@ pub fn get_programs() -> Vec<String> {
     output_str.lines().map(|line| line.to_string()).collect()
 }
 pub async fn getwindows() {
-
     let mut last_window: Option<String> = None;
     let mut start_time = Instant::now();
 
     loop {
-        let hwnd = unsafe { GetForegroundWindow() };
-        let length = unsafe { GetWindowTextLengthW(hwnd) };
+        let current_title = tokio::task::spawn_blocking(|| {
+            let hwnd = unsafe { GetForegroundWindow() };
+            let length = unsafe { GetWindowTextLengthW(hwnd) };
 
-        if length == 0 {
-            thread::sleep(Duration::from_secs(1));
-            continue;
-        }
-
-        let mut title: Vec<u16> = vec![0; (length + 1) as usize];
-
-        unsafe {
-            GetWindowTextW(hwnd, title.as_mut_ptr() as LPWSTR, length + 1);
-        }
-
-        let mut current_title = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
-
-        if current_title.contains("Firefox") || current_title.contains("Google Chrome") || current_title.contains("Microsoft Edge") || current_title.contains("Brave") {
-            let browsers = vec!["Mozilla ", "Chrome ", "Microsoft ", "Brave"];
-            for browser in browsers.iter() {
-                current_title = current_title.replace(browser, "").trim().to_string();
+            if length == 0 {
+                return None;
             }
-            if last_window.as_ref() != Some(&current_title) {
+
+            let mut title: Vec<u16> = vec![0; (length + 1) as usize];
+            unsafe {
+                GetWindowTextW(hwnd, title.as_mut_ptr() as LPWSTR, length + 1);
+            }
+
+            let mut title_text = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
+            
+            if title_text.contains("Firefox") || title_text.contains("Google Chrome") || 
+               title_text.contains("Microsoft Edge") || title_text.contains("Brave") {
+                
+                let browsers = vec!["Mozilla ", "Chrome ", "Microsoft ", "Brave"];
+                for browser in browsers.iter() {
+                    title_text = title_text.replace(browser, "").trim().to_string();
+                }
+                Some(title_text)
+            } else {
+                None
+            }
+        }).await.unwrap_or(None);
+
+        if let Some(title) = current_title {
+            if last_window.as_ref() != Some(&title) {
                 if let Some(last) = last_window.clone() {
                     let elapsed = start_time.elapsed();
                     if let Err(e) = send_to_mongo(&last, elapsed).await {
@@ -363,11 +370,11 @@ pub async fn getwindows() {
                     }
                 }
                 start_time = Instant::now();
-                last_window = Some(current_title.clone());
+                last_window = Some(title.clone());
             }
         }
 
-        thread::sleep(Duration::from_secs(1));
+        tokio::time::sleep(Duration::from_secs(1)).await;
     }
 }
 async fn send_to_mongo(window_title: &str, duration: Duration) -> Result<(), Box<dyn std::error::Error>> {
