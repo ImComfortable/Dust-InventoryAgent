@@ -4,6 +4,7 @@ use std::io::Write;
 use std::fs::{File, OpenOptions};
 use std::error::Error;
 use std::fmt;
+use std::env;
 
 #[derive(Debug)]
 pub struct ApiError {
@@ -83,14 +84,19 @@ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), B
 }
 
 fn log_error(msg: &str) {
-    let file_path = "agentLogs.txt";
+    let appdata_path = env::var("APPDATA").unwrap_or_else(|_| {
+        eprintln!("Erro ao obter o caminho do AppData. Usando o diretório atual.");
+        ".".to_string()
+    });
+
+    let log_file_path = format!("{}/agentLogs.txt", appdata_path);
 
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(file_path)
+        .open(&log_file_path)
         .unwrap_or_else(|_| {
-            File::create(file_path).expect("Erro ao criar arquivo de log")
+            File::create(&log_file_path).expect("Erro ao criar arquivo de log")
         });
 
     if let Err(e) = writeln!(file, "{}", msg) {
