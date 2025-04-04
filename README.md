@@ -1,7 +1,7 @@
 # Main purpose
 Build a simple agent who can be integraded with a platform, and work together to automate inventory management and give us a help in audict.
 
-I already make a "plataform", is simple, but usefull: 
+I already make a "plataform", is simple, but usefull: [Link](https://github.com/ImComfortable/Site-agent/tree/main)
 
 # Agent features:
 - PC Model
