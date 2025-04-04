@@ -21,7 +21,6 @@ I already make a "plataform", is simple, but usefull:
 # Features to think:
 
 - Stage validation, and improve all requests
-- Build a MSI using WixToolSet to facilitate distribuition
 - secure all routes from website and implement a token system
 - Make a separed area to admin and gestors, gestors can login to view some reports and insights
 
