@@ -16,6 +16,7 @@ I already make a "plataform", is simple, but usefull:
 - RAM
 - Restart Computer if it's online for more three days
 - Get all installed programs from computer
+- Get all acessed pages on browser and time you spent on it
 
 # Features to think:
 
