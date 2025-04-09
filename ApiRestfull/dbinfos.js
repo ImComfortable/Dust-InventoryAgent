@@ -49,6 +49,10 @@ const infoschema = new Schema({
         type: String,
         required: true,
     },
+    graphiccard: {
+        type: String,
+        required: true,
+    },
     ram: {
         type: String,
         required: true,

@@ -1,4 +1,4 @@
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 use crate::getinfo::*;
 use crate::requests::*;
@@ -7,15 +7,15 @@ use tokio::time::{sleep, Duration, Instant};
 mod getinfo;
 mod requests;
 
-
 #[tokio::main]
 async fn main() {
-    let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(10);
 
     tokio::spawn(async {
         getwindows().await;
     });
+
+    let mut last_mongodb_call = Instant::now();
+    let mongodb_interval = Duration::from_secs(60*60*6);
 
     loop {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {
@@ -29,6 +29,7 @@ async fn main() {
                 ip: get_ip_local(),
                 disco: get_disks(),
                 processador: get_processador(),
+                graphiccard: graphic_card(),
                 ram: get_total_ram(),
                 monitor: get_monitor().unwrap_or_else(|| "Monitor não encontrado".to_string()),
                 snmonitor: get_serialnumbermonitor().unwrap_or_else(|| "Monitor não encontrado".to_string()),
@@ -39,7 +40,10 @@ async fn main() {
 
             get_onlinetime();
 
-            sendinfos(info).await.expect("Erro ao chamar MongoDB");
+            if let Err(e) = sendinfos(info).await {
+                let error_msg = format!("Erro ao enviar informações: {:?}", e);
+                log_error(&error_msg);
+            }
             last_mongodb_call = Instant::now();
         }
         sleep(Duration::from_secs(5)).await;

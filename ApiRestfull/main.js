@@ -93,7 +93,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
     for (const item of data) {
       const { 
         apiauth, nome, usuario, servicetag, modelo, versao,
-        windows, ip, processador, ram, disco, monitor, snmonitor, time, programs 
+        windows, ip, processador, graphiccard, ram, disco, monitor, snmonitor, time, programs 
       } = item;
 
       if (!servicetag || !apiauth) {
@@ -128,7 +128,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
             { servicetag },
             { 
               nome, usuario, modelo, versao,  
-              windows, ip, processador, ram, disco, monitor, snmonitor, time, setor,
+              windows, ip, processador, graphiccard, ram, disco, monitor, snmonitor, time, setor,
               ultimaAtualizacao: new Date()
             },
             { new: true }
@@ -137,7 +137,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         } else {
           const newinfo = new Infos({
             nome, usuario, servicetag, modelo, versao, 
-            windows, ip, processador, ram, disco, monitor, snmonitor, time, setor,
+            windows, ip, processador, graphiccard, ram, disco, monitor, snmonitor, time, setor,
             dataCriacao: new Date(),
             ultimaAtualizacao: new Date()
           });

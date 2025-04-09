@@ -30,6 +30,7 @@ pub struct Infos {
     pub ip: String,
     pub disco: String,
     pub processador: String,
+    pub graphiccard: String,
     pub ram: String,
     pub monitor: String,
     pub snmonitor: String,
@@ -50,7 +51,7 @@ struct Payload {
 pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
     let client = reqwest::Client::new();
 
-    match client.post("http://192.168.22.80:3000/dbinfos")
+    match client.post("http://192.168.1.99:3000/dbinfos")
         .json(&info)
         .send()
         .await {
@@ -70,7 +71,7 @@ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), B
 
     let payload = Payload { user, page, date, seconds, apiauth: "JolyneTheCat120207.18".to_string() };
 
-    match client.post("http://192.168.22.80:3000/atualizar-documentos")
+    match client.post("http://192.168.1.99:3000/atualizar-documentos")
         .json(&payload)
         .send()
         .await {
@@ -83,7 +84,7 @@ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), B
     }
 }
 
-fn log_error(msg: &str) {
+pub fn log_error(msg: &str) {
     let appdata_path = env::var("APPDATA").unwrap_or_else(|_| {
         eprintln!("Erro ao obter o caminho do AppData. Usando o diretório atual.");
         ".".to_string()

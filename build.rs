@@ -8,7 +8,6 @@ fn main() {
             .set("FileDescription", "InventoryAgente")
             .set("LegalCopyright", "Copyright (c) 2025");
         
-        // Adicionar manifesto para melhor compatibilidade com Windows 10/11
         res.set_manifest(r#"
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">

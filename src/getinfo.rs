@@ -294,6 +294,22 @@ pub fn get_ip_local() -> String {
         Err(_) => "Error ao coletar o ip local".to_string()
     }    
 }
+pub fn graphic_card() -> String {
+    let gpu = Command::new("powershell")
+        .arg("/C")
+        .arg("(Get-WmiObject Win32_VideoController).Name")
+        .creation_flags(CREATE_NO_WINDOW)
+        .output();
+
+    match gpu {
+        Ok(gpu) => {
+            let output = String::from_utf8_lossy(&gpu.stdout);
+            output.trim().to_string()
+        }
+        Err(_) => "Error ao coletar a placa de video".to_string()
+    }
+}
+
 pub fn time_now() -> String {
     let agora = Local::now();
     agora.format("%d-%m-%Y às %H horas.").to_string() 
