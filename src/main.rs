@@ -15,7 +15,7 @@ async fn main() {
     });
 
     let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(60*60*6);
+    let mongodb_interval = Duration::from_secs(60*30);
 
     loop {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {

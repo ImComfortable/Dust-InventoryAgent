@@ -65,7 +65,6 @@ const infoschema = new Schema({
         type: String,
         required: true
     },
-
     usuario: {
         type: String,
         required: true,
