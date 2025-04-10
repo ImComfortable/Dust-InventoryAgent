@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+//#![windows_subsystem = "windows"]
 
 use crate::getinfo::*;
 use crate::requests::*;
@@ -15,7 +15,9 @@ async fn main() {
     });
 
     let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(60*30);
+    let mongodb_interval = Duration::from_secs(10);
+
+    println!("{}", get_disks());
 
     loop {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {

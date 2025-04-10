@@ -121,31 +121,54 @@ pub fn get_username() -> String {
         Err(_) => "Error to catch the username".to_string()
     }
 }
-pub fn get_disks() -> String {
 
+pub fn get_disks() -> String {
     let disk = Command::new("powershell")
         .arg("/C")
-        .arg("Get-PhysicalDisk | Select-Object MediaType")
+        .arg("Get-PhysicalDisk | Select-Object MediaType, Size")
         .creation_flags(CREATE_NO_WINDOW)
         .output();
 
     match disk {
         Ok(output) => {
             let disktout = String::from_utf8_lossy(&output.stdout);
+            let mut result = String::new();
+
             for line in disktout.lines() {
-                if line.contains("SSD") {
-                    let space = get_disk_storage();
-                    return format!("SSD {}GB", space); 
-                } else if line.contains("HDD") {
-                    let space = get_disk_storage();
-                    return format!("HDD {}GB", space);
+                if line.contains("SSD") || line.contains("HDD") || line.contains("Unspecified") {
+                    let media_type = if line.contains("SSD") {
+                        "SSD"
+                    } else if line.contains("HDD") {
+                        "HDD"
+                    } else {
+                        "Pendrive"
+                    };
+                    let size = extract_size_from_line(line);
+                    result.push_str(&format!("{} {}GB\n", media_type, size));
                 }
             }
-            "Desconhecido".to_string()
+
+            if result.is_empty() {
+                "Nenhum disco encontrado".to_string()
+            } else {
+                result.trim().to_string()
+            }
         }
         Err(_) => "Erro ao executar o comando".to_string(),
     }
 }
+
+fn extract_size_from_line(line: &str) -> String {
+    let size_regex = Regex::new(r"\d+").unwrap();
+    if let Some(captures) = size_regex.captures(line) {
+        if let Some(size) = captures.get(0) {
+            let size_gb = size.as_str().parse::<u64>().unwrap_or(0) / (1024 * 1024 * 1024);
+            return size_gb.to_string();
+        }
+    }
+    "Desconhecido".to_string()
+}
+
 pub fn get_total_ram() -> String {
     let output = Command::new("powershell")
         .arg("-Command")
@@ -260,23 +283,6 @@ pub fn get_windows_version() -> String {
             "Versão do Windows não encontrada".to_string()
         }
         Err(_) => "Erro ao executar o comando".to_string(),
-    }
-}
-pub fn get_disk_storage() -> String {
-    let servicetag = Command::new("powershell")
-        .arg("/C")
-        .arg("Get-WmiObject -Class Win32_DiskDrive | Select-Object Size")
-        .creation_flags(CREATE_NO_WINDOW)
-        .output();
-
-    match servicetag {
-        Ok(servicetag) => {
-            let snoutput = String::from_utf8_lossy(&servicetag.stdout);
-            let snoutput_result = snoutput.lines().nth(3).unwrap_or("Linha nao encontrada");
-            let snoutput_result_limited = snoutput_result.chars().take(3).collect::<String>();
-            snoutput_result_limited.trim().to_string()
-        }
-        Err(_) => "Error ao coletar o espaço do disco".to_string()
     }
 }
 pub fn get_ip_local() -> String {
