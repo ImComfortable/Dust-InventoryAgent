@@ -113,8 +113,10 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         if(usuario) {
           if(usuario.includes(".")) {
             setor = await search(usuario);
-          } else {
+          } else if (usuario.includes("candeias")) {
             setor = usuario.replace(/candeias/gi, "".trim());
+          } else {
+            setor = usuario.toUpperCase();
           }
         } else {
           setor = 'Não informado'
