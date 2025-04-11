@@ -121,7 +121,6 @@ pub fn get_username() -> String {
         Err(_) => "Error to catch the username".to_string()
     }
 }
-
 pub fn get_disks() -> String {
     let disk = Command::new("powershell")
         .arg("/C")
@@ -157,7 +156,6 @@ pub fn get_disks() -> String {
         Err(_) => "Erro ao executar o comando".to_string(),
     }
 }
-
 fn extract_size_from_line(line: &str) -> String {
     let size_regex = Regex::new(r"\d+").unwrap();
     if let Some(captures) = size_regex.captures(line) {
@@ -168,7 +166,6 @@ fn extract_size_from_line(line: &str) -> String {
     }
     "Desconhecido".to_string()
 }
-
 pub fn get_total_ram() -> String {
     let output = Command::new("powershell")
         .arg("-Command")
@@ -315,7 +312,6 @@ pub fn graphic_card() -> String {
         Err(_) => "Error ao coletar a placa de video".to_string()
     }
 }
-
 pub fn time_now() -> String {
     let agora = Local::now();
     agora.format("%d-%m-%Y às %H horas.").to_string() 

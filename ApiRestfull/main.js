@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import search from './configAD.js';
 import db from './dbinfos.js';
 import buscarSetorLDAP from './configAD.js';
+import { sanitize } from 'dompurify';
 const { Infos, User } = db;
 
 dotenv.config();
@@ -249,6 +250,8 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
           continue;
         }
 
+        const sanitizedPage = page.replace(/\(\d+\)/g, '').trim();
+
         // Buscar o documento do usuário
         let userDoc = await User.findOne({ username: user });
 
@@ -272,17 +275,16 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
 
           // Comparar `page` e `date` no mesmo formato
           const pageDate = p.date; // Já está no formato simples (DD-MM-YYYY)
-          return p.page === page && pageDate === date;
+          return p.page === sanitizedPage && pageDate === date;
         });
 
         if (existingPageIndex >= 0) {
-          // Atualizar o documento existente
           const currentTime = parseFloat(userDoc.pages[existingPageIndex].time || 0);
           userDoc.pages[existingPageIndex].time = currentTime + parsedSeconds;
         } else {
           // Criar um novo documento para a página com a nova data
           userDoc.pages.push({
-            page: page,
+            page: sanitizedPage,
             time: parsedSeconds,
             date: date, // Salvar a data no formato simples (DD-MM-YYYY)
             _id: new mongoose.Types.ObjectId() // Gerar um novo _id para o subdocumento
