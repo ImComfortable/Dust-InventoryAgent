@@ -242,57 +242,57 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
         }
 
         const parsedSeconds = parseFloat(seconds || 0);
-        if (isNaN(parsedSeconds)) {
-          responses.push({
-            status: 400,
-            message: `Valor inválido para seconds: ${seconds}`
-          });
-          continue;
-        }
+if (isNaN(parsedSeconds)) {
+  responses.push({
+    status: 400,
+    message: `Valor inválido para seconds: ${seconds}`
+  });
+  continue;
+}
 
-        const sanitizedPage = page.replace(/\(\d+\)/g, '').trim();
+let userDoc = await User.findOne({ username: user });
+if (!userDoc) {
+  const setor = await buscarSetorLDAP(user);
+  userDoc = new User({
+    username: user,
+    setor: setor,
+    aplicativos: [],
+    pages: [],
+  });
+}
 
-        // Buscar o documento do usuário
-        let userDoc = await User.findOne({ username: user });
+  const sanitizedPageName = sanitizedpage.trim().replace(/\s+/g, ' ');
+  const normalizedDate = date.trim();
 
-        if (!userDoc) {
-          // Criar um novo documento para o usuário, se não existir
-          const setor = await buscarSetorLDAP(user);
+  console.log(`Procurando: "${sanitizedPageName}" na data "${normalizedDate}"`);
 
-          userDoc = new User({
-            username: user,
-            setor: setor,
-            aplicativos: [],
-            pages: [],
-          });
-        }
+  const existingPageIndex = userDoc.pages.findIndex(p => {
+  const existingPageName = (p.page || '').trim().replace(/\s+/g, ' ');
+  const existingDate = (p.date || '').trim();
 
-        // Verificar se já existe uma página com a mesma data
-        const existingPageIndex = userDoc.pages.findIndex(p => {
-          if (!p.date || isNaN(new Date(p.date).getTime())) {
-            return false; // Ignorar entradas com `date` inválido
-          }
+  if (!existingDate || existingDate === '' || !existingPageName || existingPageName === '') {
+    return false;
+  }
 
-          // Comparar `page` e `date` no mesmo formato
-          const pageDate = p.date; // Já está no formato simples (DD-MM-YYYY)
-          return p.page === sanitizedPage && pageDate === date;
-        });
+  const pageMatches = existingPageName === sanitizedPageName;
+  const dateMatches = existingDate === normalizedDate;
 
-        if (existingPageIndex >= 0) {
-          const currentTime = parseFloat(userDoc.pages[existingPageIndex].time || 0);
-          userDoc.pages[existingPageIndex].time = currentTime + parsedSeconds;
-        } else {
-          // Criar um novo documento para a página com a nova data
-          userDoc.pages.push({
-            page: sanitizedPage,
-            time: parsedSeconds,
-            date: date, // Salvar a data no formato simples (DD-MM-YYYY)
-            _id: new mongoose.Types.ObjectId() // Gerar um novo _id para o subdocumento
-          });
-        }
+  return pageMatches && dateMatches;
+});
 
-        // Salvar as alterações no banco de dados
-        await userDoc.save();
+if (existingPageIndex >= 0) {
+  const currentTime = parseFloat(userDoc.pages[existingPageIndex].time || 0);
+  userDoc.pages[existingPageIndex].time = currentTime + parsedSeconds;
+} else {
+  userDoc.pages.push({
+    page: sanitizedPageName,
+    time: parsedSeconds,
+    date: normalizedDate,
+    _id: new mongoose.Types.ObjectId()
+  });
+}
+
+await userDoc.save();
 
         responses.push({
           status: 200,
@@ -315,7 +315,7 @@ app.post('/atualizar-documentos', verifyRequest, async (req, res) => {
       totalProcessed: data.length,
       responses
     });
-    
+
   } catch (error) {
     console.error('Erro geral no processamento da requisição:', error);
     return res.status(500).json({
