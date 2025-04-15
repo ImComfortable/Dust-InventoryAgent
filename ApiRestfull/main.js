@@ -261,7 +261,6 @@ if (!userDoc) {
   });
 }
 
-  const sanitizedPageName = sanitizedpage.trim().replace(/\s+/g, ' ');
   const normalizedDate = date.trim();
 
   console.log(`Procurando: "${sanitizedPageName}" na data "${normalizedDate}"`);
