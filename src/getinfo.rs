@@ -1,15 +1,20 @@
 use hostname::get as get_hostname;
 use winapi::um::winbase::CREATE_NO_WINDOW;
+use winapi::um::winuser::{GetWindowTextW, GetWindowTextLengthW, GetForegroundWindow};
+use winapi::um::winnt::LPWSTR;
+use winapi::um::sysinfoapi::GetTickCount;
+use winapi::um::winuser::GetLastInputInfo;
+use winapi::um::winuser::LASTINPUTINFO;
+
 use tokio::time::{Duration, Instant};
-use std::process::{Command};
+use std::process::Command;
 use std::os::windows::process::CommandExt;
 use std::thread;
 use regex::Regex;
 use chrono::Local;
+
 use crate::requests::sendpages;
-use winapi::{
-    um::{
-        winuser::{GetWindowTextW, GetWindowTextLengthW, GetForegroundWindow},winnt::LPWSTR},};
+
 
 pub fn get_serialnumber() -> String {
     let servicetag = Command::new("powershell")
@@ -346,11 +351,48 @@ pub fn get_programs() -> Vec<String> {
     let output_str = String::from_utf8(output.stdout).expect("Erro ao converter a saída para string");
     output_str.lines().map(|line| line.to_string()).collect()
 }
+fn get_last_input_time() -> u64 {
+    unsafe {
+        let mut last_input = LASTINPUTINFO {
+            cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
+            dwTime: 0,
+        };
+        if GetLastInputInfo(&mut last_input) != 0 {
+            let current_tick = GetTickCount();
+            return(current_tick - last_input.dwTime) as u64;
+        }
+
+        0
+    }
+}
+fn is_inactive(last_active_time: &Instant, threshold: Duration) -> bool {
+    last_active_time.elapsed() > threshold
+}
 pub async fn getwindows() {
     let mut last_window: Option<String> = None;
     let mut start_time = Instant::now();
+    let mut last_active_time = Instant::now();
+    let inactive_threashold = Duration::from_secs(60);
 
     loop {
+        let current_input_time = get_last_input_time();
+        let system_indle_time = Duration::from_millis(current_input_time as u64);
+
+        if system_indle_time > inactive_threashold {
+            if !is_inactive(&last_active_time, inactive_threashold) {
+                if let Some(last) = last_window.clone() {
+                    if let Err(e) = send_to_mongo(&format!("[INATIVO]"), last_active_time.elapsed()).await {
+                        eprintln!("Erro ao atualizar o resumo do MongoDB: {}", e);
+                    }
+                }
+            }
+        } else {
+            if is_inactive(&last_active_time, inactive_threashold) {
+                start_time = Instant::now();
+            }
+            last_active_time = Instant::now();
+        }
+
         let current_title = tokio::task::spawn_blocking(|| {
             let hwnd = unsafe { GetForegroundWindow() };
             let length = unsafe { GetWindowTextLengthW(hwnd) };

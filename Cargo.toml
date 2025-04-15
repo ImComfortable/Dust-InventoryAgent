@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 hostname = "0.4.0"
-winapi = { version = "0.3", features = ["winuser", "windef", "winbase"] }
+winapi = { version = "0.3", features = ["sysinfoapi", "winuser", "windef", "winbase"] }
 chrono = "0.4.38"
 time = "0.3.36"
 regex = "1.11.1"
