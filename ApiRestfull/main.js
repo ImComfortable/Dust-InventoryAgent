@@ -8,7 +8,6 @@ import dotenv from 'dotenv';
 import search from './configAD.js';
 import db from './dbinfos.js';
 import buscarSetorLDAP from './configAD.js';
-import { sanitize } from 'dompurify';
 const { Infos, User } = db;
 
 dotenv.config();
@@ -266,7 +265,7 @@ if (!userDoc) {
   console.log(`Procurando: "${sanitizedPageName}" na data "${normalizedDate}"`);
 
   const existingPageIndex = userDoc.pages.findIndex(p => {
-  const existingPageName = (p.page || '').trim().replace(/\s+/g, ' ');
+  const existingPageName = (p.page || '').trim().replace(/\(\d+(\.\d+)?\)/g, ' ');
   const existingDate = (p.date || '').trim();
 
   if (!existingDate || existingDate === '' || !existingPageName || existingPageName === '') {

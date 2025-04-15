@@ -375,7 +375,7 @@ pub async fn getwindows() {
                 }
                 Some(title_text)
             } else {
-                None
+                Some(title_text)
             }
         }).await.unwrap_or(None);
 
