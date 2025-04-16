@@ -1,0 +1,28 @@
+[package]
+name = "Agente"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hostname = "0.4.0"
+winapi = { version = "0.3", features = ["sysinfoapi", "winuser", "windef", "winbase"] }
+chrono = "0.4.38"
+time = "0.3.36"
+regex = "1.11.1"
+reqwest = { version = "0.11", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[package.metadata.winres]
+icon = "icon.ico"
+
+[target.'cfg(target_os = "windows")'.build-dependencies]
+winres = "0.1"
+
+[profile.release]
+opt-level = "z" 
+lto = true 
+codegen-units = 1
+panic = "abort"  
+strip = true 

@@ -1,0 +1,11 @@
+/target
+/server/node_modules
+/package-lock.json
+/package.json
+/.vs
+/ApiRestfull/.env
+/agentLogs.txt
+/target
+/ApiRestfull/package-lock.json
+/ApiRestfull/package.json
+/ApiRestfull/node_modules
