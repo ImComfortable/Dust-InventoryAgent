@@ -28,6 +28,7 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 - Remove App list from audict page and add it on actives page
 - Make a separed area to admin and gestors, gestors can login to view some reports and insights
 - Build msi to install agent for compunter betwen user
+- Build Insights with just one click
 
 # MSI Template
 This file is a simple template to build a MSI file, you only need wix installed on your computer, just compile and build.
