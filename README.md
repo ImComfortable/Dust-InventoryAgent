@@ -20,9 +20,14 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 
 # Features to think:
 
-- Stage validation, and improve all requests
-- secure all routes from website and implement a token system
+- Add servicetag on page capture
+- System to define horary for set departament work time, it will help to define a hour to shutdown the computers
+- Configuration page
+- Filter and some window in actives page to separeted inactive computers from active computers
+- Comment all code, to make it more understandable 
+- Remove App list from audict page and add it on actives page
 - Make a separed area to admin and gestors, gestors can login to view some reports and insights
+- Build msi to install agent for compunter betwen user
 
 # MSI Template
 This file is a simple template to build a MSI file, you only need wix installed on your computer, just compile and build.

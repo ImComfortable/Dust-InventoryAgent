@@ -131,6 +131,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
             { 
               nome, usuario, modelo, versao,  
               windows, ip, processador, graphiccard, ram, disco, monitor, snmonitor, time, setor,
+              aplicativos: processarListaProgramas(programs),
               ultimaAtualizacao: new Date()
             },
             { new: true }
@@ -140,6 +141,7 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
           const newinfo = new Infos({
             nome, usuario, servicetag, modelo, versao, 
             windows, ip, processador, graphiccard, ram, disco, monitor, snmonitor, time, setor,
+            aplicativos: processarListaProgramas(programs),
             dataCriacao: new Date(),
             ultimaAtualizacao: new Date()
           });

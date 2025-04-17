@@ -1,3 +1,4 @@
+import { date } from 'joi';
 import { Schema, model, set } from 'mongoose';
 
 const infoschema = new Schema({
@@ -84,6 +85,10 @@ const infoschema = new Schema({
         type: String,
         required: true,
     },
+    aplicativos: {
+        type: [String],
+        default: []
+      },
 });
 
 const UserSchema = new Schema({
@@ -96,15 +101,17 @@ const UserSchema = new Schema({
       type: String,
       default: 'Não informado'
     },
-    aplicativos: {
-        type: [String],
-        default: []
-      },
     pages: [
         {
             page: { type: String, required: true },
             time: { type: Number, default: 0 },
-            date: { type: String, required: true}
+            date: { type: String, required: true},
+            horario: { type: String, default: () => {
+                let date = new Date();
+                let hours = date.getHours().toString().padStart(2, '0');
+                let minutes = date.getMinutes().toString().padStart(2, '0');
+                return `${hours}:${minutes}`;
+            }}
         }
     ],
   }); 
