@@ -20,16 +20,16 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 
 # Features to think:
 
-- Add servicetag on page capture
-- System to define horary for set departament work time, it will help to define a hour to shutdown the computers
-- Configuration page
-- Filter and some window in actives page to separeted inactive computers from active computers
-- Comment all code, to make it more understandable 
-- Remove App list from audict page and add it on actives page
-- Make a separed area to admin and gestors, gestors can login to view some reports and insights
-- Build msi to install agent for compunter betwen user
-- Build Insights with just one click
+- Add Service Tag display on the capture page
+- Implement a system to define department working hours — this will help schedule computer shutdown times
+- Create a Configuration page
+- Add filters and a dedicated section on the Actives page to separate inactive computers from active ones
+- Add comments throughout the code to improve readability and understanding
+- Remove the application list from the Audit page and move it to the Actives page
+- Create a separate area for Admins and Managers — managers can log in to view reports and insights
+- Build an MSI installer for deploying the agent across user computers
 
+Enable one-click generation of insights
 # MSI Template
 This file is a simple template to build a MSI file, you only need wix installed on your computer, just compile and build.
 [Template used to make a base](https://github.com/letsdoautomation/wix-toolset-4-cli/tree/49292c799901d8dc69b68e20bdf204c454637a8f/Create%20Visual%20Studio%20Code%20MSI%20installation%20file)  
