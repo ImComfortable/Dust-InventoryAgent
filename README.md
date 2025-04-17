@@ -27,9 +27,7 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 - Add comments throughout the code to improve readability and understanding
 - Remove the application list from the Audit page and move it to the Actives page
 - Create a separate area for Admins and Managers — managers can log in to view reports and insights
-- Build an MSI installer for deploying the agent across user computers
-
-Enable one-click generation of insights
+- Enable one-click generation of insights
 # MSI Template
 This file is a simple template to build a MSI file, you only need wix installed on your computer, just compile and build.
 [Template used to make a base](https://github.com/letsdoautomation/wix-toolset-4-cli/tree/49292c799901d8dc69b68e20bdf204c454637a8f/Create%20Visual%20Studio%20Code%20MSI%20installation%20file)  
