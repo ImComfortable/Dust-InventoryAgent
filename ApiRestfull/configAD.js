@@ -2,17 +2,6 @@ import ldapjs from 'ldapjs';
 
 
 export default async function buscarSetorLDAP(loginUsuario) {
-    if (!loginUsuario) {
-        console.log('Login do usuário não informado');
-        return 'Não informado';
-    }
-    if (loginUsuario.toLowerCase().includes('candeias')) {
-        const officeLocation = loginUsuario.replace(/candeias/gi, '').trim();
-        return officeLocation.toUpperCase();
-    }
-    if (!loginUsuario.toLowerCase().includes('.')) {
-        return loginUsuario.toUpperCase();
-    }
     const AD_URL = process.env.AD_SERVER;
     if (!AD_URL) {
         console.log('URL do AD não configurada');
