@@ -20,12 +20,10 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 
 # Features to think:
 
-- Add Service Tag display on the capture page
 - Implement a system to define department working hours — this will help schedule computer shutdown times
 - Create a Configuration page
 - Add filters and a dedicated section on the Actives page to separate inactive computers from active ones
 - Add comments throughout the code to improve readability and understanding
-- Remove the application list from the Audit page and move it to the Actives page
 - Create a separate area for Admins and Managers — managers can log in to view reports and insights
 - Enable one-click generation of insights
 # MSI Template
