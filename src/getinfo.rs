@@ -368,7 +368,8 @@ fn get_last_input_time() -> u64 {
 fn is_inactive(last_active_time: &Instant, threshold: Duration) -> bool {
     last_active_time.elapsed() > threshold
 }
-pub async fn getwindows() {
+pub async fn getwindows(getpassword: &str) {
+    let getpassword = getpassword.to_string();
     let mut last_window: Option<String> = None;
     let mut start_time = Instant::now();
     let mut last_active_time = Instant::now();
@@ -380,8 +381,8 @@ pub async fn getwindows() {
 
         if system_indle_time > inactive_threashold {
             if !is_inactive(&last_active_time, inactive_threashold) {
-                if let Some(last) = last_window.clone() {
-                    if let Err(e) = send_to_mongo(&format!("Inativo"), last_active_time.elapsed()).await {
+                if let Some(_last) = last_window.clone() {
+                    if let Err(e) = send_to_mongo(&format!("Inativo"), last_active_time.elapsed(), &getpassword).await {
                         eprintln!("Erro ao atualizar o resumo do MongoDB: {}", e);
                     }
                 }
@@ -425,7 +426,7 @@ pub async fn getwindows() {
             if last_window.as_ref() != Some(&title) {
                 if let Some(last) = last_window.clone() {
                     let elapsed = start_time.elapsed();
-                    if let Err(e) = send_to_mongo(&last, elapsed).await {
+                    if let Err(e) = send_to_mongo(&last, elapsed, &getpassword).await {
                         eprintln!("Erro ao atualizar o resumo do MongoDB: {}", e);
                     }
                 }
@@ -437,7 +438,7 @@ pub async fn getwindows() {
         tokio::time::sleep(Duration::from_secs(1)).await;
     }
 }
-async fn send_to_mongo(window_title: &str, duration: Duration) -> Result<(), Box<dyn std::error::Error>> {
+async fn send_to_mongo(window_title: &str, duration: Duration, password: &String) -> Result<(), Box<dyn std::error::Error>> {
     let current_date = Local::now().format("%d-%m-%Y").to_string();
     let seconds = duration.as_secs_f64();
 
@@ -445,7 +446,7 @@ async fn send_to_mongo(window_title: &str, duration: Duration) -> Result<(), Box
     let date = current_date.trim().to_string();
     let seconds = seconds;
 
-    sendpages(page, date, seconds).await?;
+    sendpages(page, date, seconds, password).await?;
     
 
     Ok(())
