@@ -282,6 +282,8 @@ if (!userDoc) {
   return pageMatches && dateMatches;
 });
 
+const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').replace('::ffff:', '');
+
 if (existingPageIndex >= 0) {
   const currentTime = parseFloat(userDoc.pages[existingPageIndex].time || 0);
   userDoc.pages[existingPageIndex].time = currentTime + parsedSeconds;
@@ -290,6 +292,7 @@ if (existingPageIndex >= 0) {
     page: sanitizedPageName,
     time: parsedSeconds,
     date: normalizedDate,
+    ip: clientIp,
     _id: new mongoose.Types.ObjectId()
   });
 }
