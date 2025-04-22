@@ -1,6 +1,5 @@
 <?define name = "RustInventoryAgent"?>
 <?define exe = "Agente.exe"?>
-<?define path = "Path"?>
 <?define silentArgs = "/VERYSILENT /NORESTART /SUPPRESSMSGBOXES /MERGETASKS=!runcode"?>
 <?define version = "2.0"?>
 <?define publisher = "Comfortable"?>
@@ -8,21 +7,33 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="$(var.name)" Manufacturer="$(var.publisher)" Version="$(var.version)"
          UpgradeCode="$(var.guid)" Language="1033" Codepage="UTF-8">
-        <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
+        <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
         <MajorUpgrade DowngradeErrorMessage="Uma versão mais recente do [ProductName] já está instalada." />
         <MediaTemplate EmbedCab="yes" />
         <Property Id="ARPPRODUCTICON" Value="icon.ico" />
         <Icon Id="icon.ico" SourceFile="icon.ico" />
         <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="ProgramFilesFolder">
+            <Directory Id="LocalAppDataFolder">
                 <Directory Id="INSTALLFOLDER" Name="$(var.name)">
                     <Component Id="fileComponent" Guid="bf6b8ce1-f0a2-4f4e-b9f5-74fba47b5701">
-                        <File Id="executable" Name="$(var.exe)" Source="$(var.path)\$(var.exe)" />
+                        <File Id="executable" Name="$(var.exe)" Source="$(var.exe)" />
+                        <RegistryKey Root="HKCU" Key="Software\$(var.publisher)\$(var.name)">
+                            <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]$(var.exe)" KeyPath="yes" />
+                        </RegistryKey>
+                    </Component>
+                    <Component Id="configfilecomponent" Guid="bf6b8ce1-f0a2-4f4e-b9f5-74fba47b5701">
+                        <File Id="configfile" Name="config.json" Source="config.json" />
                         <RegistryKey Root="HKCU" Key="Software\$(var.publisher)\$(var.name)">
                             <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]$(var.exe)" KeyPath="yes" />
                         </RegistryKey>
                     </Component>
                 </Directory>
+                <Feature Id="ProductFeature" Title="$(var.name)" Level="1">
+                 <ComponentRef Id="fileComponent" />
+                 <ComponentRef Id="configFileComponent" />
+                 <ComponentRef Id="StartupShortcut" />
+                 <ComponentGroupRef Id="RegistryEntries" />
+            </Feature>
             </Directory>
             <Directory Id="StartMenuFolder">
                 <Directory Id="ProgramMenuFolder">
