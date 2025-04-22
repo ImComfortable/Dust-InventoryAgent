@@ -16,24 +16,19 @@
             <Directory Id="LocalAppDataFolder">
                 <Directory Id="INSTALLFOLDER" Name="$(var.name)">
                     <Component Id="fileComponent" Guid="bf6b8ce1-f0a2-4f4e-b9f5-74fba47b5701">
-                        <File Id="executable" Name="$(var.exe)" Source="$(var.exe)" />
+                        <File Id="executable" Name="$(var.exe)" Source="$(var.exe)" KeyPath="yes" />
                         <RegistryKey Root="HKCU" Key="Software\$(var.publisher)\$(var.name)">
-                            <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]$(var.exe)" KeyPath="yes" />
+                            <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]$(var.exe)" />
                         </RegistryKey>
+                        <RemoveFolder Id="INSTALLFOLDER" On="uninstall" />
                     </Component>
-                    <Component Id="configfilecomponent" Guid="bf6b8ce1-f0a2-4f4e-b9f5-74fba47b5701">
-                        <File Id="configfile" Name="config.json" Source="config.json" />
+                    <Component Id="configfilecomponent" Guid="d3f8c5a7-9b4e-4f2a-8c3d-1e6f7a9b5c2d">
+                        <File Id="configfile" Name="config.json" Source="config.json" KeyPath="yes" />
                         <RegistryKey Root="HKCU" Key="Software\$(var.publisher)\$(var.name)">
-                            <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]$(var.exe)" KeyPath="yes" />
+                            <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]$(var.exe)" />
                         </RegistryKey>
                     </Component>
                 </Directory>
-                <Feature Id="ProductFeature" Title="$(var.name)" Level="1">
-                 <ComponentRef Id="fileComponent" />
-                 <ComponentRef Id="configFileComponent" />
-                 <ComponentRef Id="StartupShortcut" />
-                 <ComponentGroupRef Id="RegistryEntries" />
-            </Feature>
             </Directory>
             <Directory Id="StartMenuFolder">
                 <Directory Id="ProgramMenuFolder">
@@ -42,10 +37,11 @@
                             <Shortcut Id="StartupShortcut" 
                                       Name="$(var.name)" 
                                       Description="Inicia $(var.name)" 
-                                      Target="[INSTALLFOLDER]$(var.exe)" 
-                                      WorkingDirectory="INSTALLFOLDER"/>
+                                      Target="[INSTALLFOLDER]$(var.exe)" />
                             <RegistryValue Root="HKCU" Key="Software\$(var.publisher)\$(var.name)\Shortcut" 
-                                           Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+                                           Name="installed" Type="integer" Value="1" KeyPath="yes" />
+                            <RegistryValue Root="HKCU" Key="Software\$(var.publisher)\$(var.name)" 
+                                           Name="StartupShortcut" Type="string" Value="[StartupFolder]$(var.name).lnk" />
                         </Component>
                     </Directory>
                 </Directory>
@@ -60,17 +56,16 @@
         </ComponentGroup>
         <Feature Id="ProductFeature" Title="$(var.name)" Level="1">
             <ComponentRef Id="fileComponent" />
+            <ComponentRef Id="configfilecomponent" />
             <ComponentRef Id="StartupShortcut" />
             <ComponentGroupRef Id="RegistryEntries" />
         </Feature>
-        <Property Id="EXEPATH" Value="Hidden" />
-        <SetProperty Id="EXEPATH" Value="[INSTALLFOLDER]$(var.exe)" After="CostFinalize" />
-        <SetProperty Id="EXECOMMAND" Value="$(var.silentArgs)" After="CostFinalize" />
-        <CustomAction Id="run_exe" FileKey="executable" ExeCommand="$(var.silentArgs)"
-                      Return="asyncNoWait" Execute="immediate" />
-                      
-        <InstallExecuteSequence>
-            <Custom Action="run_exe" After="InstallFinalize">NOT Installed</Custom>
-        </InstallExecuteSequence>
+<CustomAction Id="LaunchAppAfterInstall" Directory="INSTALLFOLDER" 
+              ExeCommand="[INSTALLFOLDER]$(var.exe)" 
+              Execute="deferred" 
+              Return="asyncNoWait" />
+<InstallExecuteSequence>
+    <Custom Action="LaunchAppAfterInstall" Before="InstallFinalize">NOT Installed</Custom>
+</InstallExecuteSequence>
     </Product>
 </Wix>
