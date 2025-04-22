@@ -1,9 +1,9 @@
-<?define name = "Inventory Agent"?>
+<?define name = "RustInventoryAgent"?>
 <?define exe = "Agente.exe"?>
 <?define path = "Path"?>
 <?define silentArgs = "/VERYSILENT /NORESTART /SUPPRESSMSGBOXES /MERGETASKS=!runcode"?>
 <?define version = "2.0"?>
-<?define publisher = "Carlinhos"?>
+<?define publisher = "Comfortable"?>
 <?define guid = "bf6b8ce1-f0a2-4f4e-b9f5-74fba47b570f"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="$(var.name)" Manufacturer="$(var.publisher)" Version="$(var.version)"
