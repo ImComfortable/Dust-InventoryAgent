@@ -85,12 +85,12 @@ pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), B
 }
 
 pub fn log_error(msg: &str) {
-    let appdata_path = env::var("APPDATA").unwrap_or_else(|_| {
+    let appdata_path = env::var("LOCALAPPDATA").unwrap_or_else(|_| {
         eprintln!("Erro ao obter o caminho do AppData. Usando o diretório atual.");
         ".".to_string()
     });
 
-    let log_file_path = format!("{}/agentLogs.txt", appdata_path);
+    let log_file_path = format!("{}/rustinventoryagent/Logs.txt", appdata_path);
 
     let mut file = OpenOptions::new()
         .create(true)
@@ -101,6 +101,6 @@ pub fn log_error(msg: &str) {
         });
 
     if let Err(e) = writeln!(file, "{}", msg) {
-        eprintln!("Erro ao escrever no arquivo de log: {}", e);
+        eprintln!("path do arquivo {} Erro ao escrever no arquivo de log: {}", e, log_file_path);
     }
 }
