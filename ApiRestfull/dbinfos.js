@@ -1,5 +1,6 @@
-import { date } from 'joi';
-import { Schema, model, set } from 'mongoose';
+import pkg from 'joi';
+const { date } = pkg;
+import { Schema, model} from 'mongoose';
 
 const infoschema = new Schema({
     nome: {
@@ -106,6 +107,7 @@ const UserSchema = new Schema({
             page: { type: String, required: true },
             time: { type: Number, default: 0 },
             date: { type: String, required: true},
+            ip: { type: String, required: true },
             horario: { type: String, default: () => {
                 let date = new Date();
                 let hours = date.getHours().toString().padStart(2, '0');
