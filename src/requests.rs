@@ -40,18 +40,18 @@ pub struct Infos {
 }
 
 #[derive(Serialize, Debug)]
-struct Payload {
+struct Payload<'a> {
     user: String,
     page: String,
     date: String,
     seconds: f64,
-    apiauth: String,
+    apiauth: &'a String,
 }
 
 pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
     let client = reqwest::Client::new();
 
-    match client.post("?/dbinfos")
+    match client.post("http://127.0.0.1:3000/dbinfos")
         .json(&info)
         .send()
         .await {
@@ -64,14 +64,16 @@ pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
     }
 }
 
-pub async fn sendpages(page: String, date: String, seconds: f64) -> Result<(), Box<dyn Error>> {
+pub async fn sendpages(page: String, date: String, seconds: f64, password: &String) -> Result<(), Box<dyn Error>> {
     let client = reqwest::Client::new();
 
     let user = get_username();
 
-    let payload = Payload { user, page, date, seconds, apiauth: "JolyneTheCat120207.18".to_string() };
+    let payload = Payload { user, page, date, seconds, apiauth: password};
 
-    match client.post("?/atualizar-documentos")
+    println!("Payload: {:?}", payload);
+
+    match client.post("http://127.0.0.1:3000/atualizar-documentos")
         .json(&payload)
         .send()
         .await {
