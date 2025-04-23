@@ -3,10 +3,6 @@
 use crate::getinfo::*;
 use crate::requests::*;
 use tokio::time::{sleep, Duration, Instant};
-use std::fs::File;
-use std::io::Read;
-use serde_json::Value;
-
 
 mod getinfo;
 mod requests;
@@ -15,7 +11,7 @@ mod requests;
 async fn main() {
 
     tokio::spawn(async {
-        getwindows(&get_password()).await;
+        getwindows().await;
     });
 
     let mut last_mongodb_call = Instant::now();
@@ -54,11 +50,3 @@ async fn main() {
     }
 }
 
-fn get_password() -> String {
-    let mut file = File::open("config.json").expect("Unable to open file");
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).expect("Unable to read file");
-    let json: Value = serde_json::from_str(&contents).expect("Unable to parse JSON");
-    let password = json["password"].as_str().unwrap_or("default_password").to_string();
-    password
-}
