@@ -16,12 +16,10 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 - RAM
 - Restart Computer if it's online for more three days
 - Get all installed programs from computer
-- Get all acessed pages on browser and time you spent on it
+- Get all active pages and applications, beyond time you spent on it
 
 # Features to think:
 
-- Implement a system to define department working hours — this will help schedule computer shutdown times
-- Create a Configuration page
 - Add filters and a dedicated section on the Actives page to separate inactive computers from active ones
 - Add comments throughout the code to improve readability and understanding
 - Create a separate area for Admins and Managers — managers can log in to view reports and insights
