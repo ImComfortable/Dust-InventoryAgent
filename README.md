@@ -2,7 +2,6 @@
 Build a simple agent who can be integraded with a platform, and work together to automate inventory management and give us a help in audict.
 
 I already make a "plataform", is simple, but usefull: [Link](https://github.com/ImComfortable/Site-agent/tree/main)
-
 # Agent features:
 - PC Model
 - Hostname
@@ -17,7 +16,6 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 - Restart Computer if it's online for more three days
 - Get all installed programs from computer
 - Get all active pages and applications, beyond time you spent on it
-
 # Features to think:
 
 - Add filters and a dedicated section on the Actives page to separate inactive computers from active ones
