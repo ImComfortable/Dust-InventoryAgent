@@ -12,8 +12,30 @@ use std::os::windows::process::CommandExt;
 use std::thread;
 use regex::Regex;
 use chrono::Local;
+use std::path::Path;
+use serde_json::Value;
+use std::fs::File;
+use std::io::Read;
 
-use crate::requests::sendpages;
+
+use crate::requests::{sendpages, log_error};
+
+
+pub fn get_password() -> String {
+    let path = Path::new("config.json");
+
+    if !path.exists() {
+        log_error("Arquivo de configuração não encontrado.");
+        return "default_password".to_string();
+    }
+
+    let mut file = File::open(path).expect("Erro ao abrir o arquivo de configuração.");
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).expect("Erro ao ler o arquivo de configuração.");
+    let json: Value = serde_json::from_str(&contents).expect("Erro ao fazer parse do JSON.");
+    let password = json["password"].as_str().unwrap_or_default().to_string();
+    password
+}
 
 
 pub fn get_serialnumber() -> String {
@@ -368,14 +390,14 @@ fn get_last_input_time() -> u64 {
 fn is_inactive(last_active_time: &Instant, threshold: Duration) -> bool {
     last_active_time.elapsed() > threshold
 }
-pub async fn getwindows(getpassword: &str) {
-    let getpassword = getpassword.to_string();
+pub async fn getwindows() {
     let mut last_window: Option<String> = None;
     let mut start_time = Instant::now();
     let mut last_active_time = Instant::now();
     let inactive_threashold = Duration::from_secs(60 * 10);
 
     loop {
+        let getpassword = get_password();
         let current_input_time = get_last_input_time();
         let system_indle_time = Duration::from_millis(current_input_time as u64);
 
