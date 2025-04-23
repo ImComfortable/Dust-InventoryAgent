@@ -260,7 +260,9 @@ if (!userDoc) {
     aplicativos: [],
     pages: [],
   });
-}
+  await userDoc.save();}
+
+  const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').replace('::ffff:', '');
 
   const sanitizedPageName = page.replace(/\(\d+(\.\d+)?\)/g, ' ').trim();
 
@@ -281,8 +283,6 @@ if (!userDoc) {
 
   return pageMatches && dateMatches;
 });
-
-const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').replace('::ffff:', '');
 
 if (existingPageIndex >= 0) {
   const currentTime = parseFloat(userDoc.pages[existingPageIndex].time || 0);
