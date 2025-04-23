@@ -51,7 +51,7 @@ struct Payload<'a> {
 pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
     let client = reqwest::Client::new();
 
-    match client.post("http://127.0.0.1:3000/dbinfos")
+    match client.post("http://?/dbinfos")
         .json(&info)
         .send()
         .await {
@@ -70,10 +70,8 @@ pub async fn sendpages(page: String, date: String, seconds: f64, password: &Stri
     let user = get_username();
 
     let payload = Payload { user, page, date, seconds, apiauth: password};
-
-    println!("Payload: {:?}", payload);
-
-    match client.post("http://127.0.0.1:3000/atualizar-documentos")
+    
+    match client.post("http://?/atualizar-documentos")
         .json(&payload)
         .send()
         .await {
@@ -102,7 +100,7 @@ pub fn log_error(msg: &str) {
             File::create(&log_file_path).expect("Erro ao criar arquivo de log")
         });
 
-    if let Err(e) = writeln!(file, "{}", msg) {
+    if let Err(e) = writeln!(file, "\n{}", msg) {
         eprintln!("path do arquivo {} Erro ao escrever no arquivo de log: {}", e, log_file_path);
     }
 }
