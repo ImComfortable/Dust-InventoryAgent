@@ -1,14 +1,18 @@
 <?define name = "RustInventoryAgent"?>
 <?define exe = "Agente.exe"?>
 <?define silentArgs = "/VERYSILENT /NORESTART /SUPPRESSMSGBOXES /MERGETASKS=!runcode"?>
-<?define version = "2.0"?>
+<?define version = "3.0"?>
 <?define publisher = "Comfortable"?>
 <?define guid = "bf6b8ce1-f0a2-4f4e-b9f5-74fba47b570f"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="$(var.name)" Manufacturer="$(var.publisher)" Version="$(var.version)"
          UpgradeCode="$(var.guid)" Language="1033" Codepage="UTF-8">
         <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
-        <MajorUpgrade DowngradeErrorMessage="Uma versão mais recente do [ProductName] já está instalada." />
+        <MajorUpgrade 
+        AllowDowngrades="no" 
+        DowngradeErrorMessage="Uma versão mais recente do [ProductName] já está instalada." 
+        Schedule="afterInstallInitialize" 
+        RemoveFeatures="ALL" />
         <MediaTemplate EmbedCab="yes" />
         <Property Id="ARPPRODUCTICON" Value="icon.ico" />
         <Icon Id="icon.ico" SourceFile="icon.ico" />
@@ -35,9 +39,10 @@
                     <Directory Id="StartupFolder" Name="Startup">
                         <Component Id="StartupShortcut" Guid="bf6b8ce1-f0a2-4f4e-b9f5-74fba47b5703">
                             <Shortcut Id="StartupShortcut" 
-                                      Name="$(var.name)" 
-                                      Description="Inicia $(var.name)" 
-                                      Target="[INSTALLFOLDER]$(var.exe)" />
+          Name="$(var.name)" 
+          Description="Inicia $(var.name)" 
+          Target="cmd.exe" 
+          Arguments="/K [INSTALLFOLDER]$(var.exe)" />
                             <RegistryValue Root="HKCU" Key="Software\$(var.publisher)\$(var.name)\Shortcut" 
                                            Name="installed" Type="integer" Value="1" KeyPath="yes" />
                             <RegistryValue Root="HKCU" Key="Software\$(var.publisher)\$(var.name)" 
