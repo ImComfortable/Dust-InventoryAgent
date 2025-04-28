@@ -260,16 +260,38 @@ if (!userDoc) {
     aplicativos: [],
     pages: [],
   });
-  await userDoc.save();
+  await userDoc.save();}
 
+  const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').replace('::ffff:', '');
+
+  const sanitizedPageName = page.replace(/\(\d+(\.\d+)?\)/g, ' ').trim();
+
+  const normalizedDate = date.trim();
+
+  console.log(`Procurando: "${sanitizedPageName}" na data "${normalizedDate}"`);
+
+  const existingPageIndex = userDoc.pages.findIndex(p => {
+  const existingPageName = (p.page || '').trim().replace(/\(\d+(\.\d+)?\)/g, ' ');
+  const existingDate = (p.date || '').trim();
+
+  if (!existingDate || existingDate === '' || !existingPageName || existingPageName === '') {
+    return false;
+  }
+
+  const pageMatches = existingPageName === sanitizedPageName;
+  const dateMatches = existingDate === normalizedDate;
+
+  return pageMatches && dateMatches;
+});
+
+if (existingPageIndex >= 0) {
+  const currentTime = parseFloat(userDoc.pages[existingPageIndex].time || 0);
+  userDoc.pages[existingPageIndex].time = currentTime + parsedSeconds;
 } else {
-
-let clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.ip;
-
-userDoc.pages.push({
-    page: page,
+  userDoc.pages.push({
+    page: sanitizedPageName,
     time: parsedSeconds,
-    date: date,
+    date: normalizedDate,
     ip: clientIp,
     _id: new mongoose.Types.ObjectId()
   });

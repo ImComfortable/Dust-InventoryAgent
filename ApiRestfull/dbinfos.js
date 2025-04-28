@@ -108,22 +108,12 @@ const UserSchema = new Schema({
             time: { type: Number, default: 0 },
             date: { type: String, required: true},
             ip: { type: String, required: true },
-            horariend: { type: String, default: () => {
+            horario: { type: String, default: () => {
                 let date = new Date();
                 let hours = date.getHours().toString().padStart(2, '0');
                 let minutes = date.getMinutes().toString().padStart(2, '0');
                 return `${hours}:${minutes}`;
-            }},
-            horastart: { 
-                type: String, 
-                default: function() {
-                    const [endHours, endMinutes] = this.horariend.split(':').map(Number);
-                    const totalMinutes = endHours * 60 + endMinutes - Math.floor(this.time / 60);
-                    const startHours = Math.floor(totalMinutes / 60) % 24;
-                    const startMinutes = totalMinutes % 60;
-                    return `${startHours.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}`;
-                }
-            }
+            }}
         }
     ],
   }); 
