@@ -19,6 +19,7 @@ use std::io::Read;
 
 
 use crate::requests::{sendpages, log_error};
+use crate::spawn_audit;
 
 
 pub fn get_password() -> String {

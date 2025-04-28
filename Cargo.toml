@@ -8,11 +8,13 @@ hostname = "0.4.0"
 winapi = { version = "0.3", features = ["sysinfoapi", "winuser", "windef", "winbase"] }
 chrono = "0.4.38"
 time = "0.3.36"
+slint = "1.8.0"
 regex = "1.11.1"
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+slint-build = "1.8.0"
 
 [package.metadata.winres]
 icon = "icon.ico"
@@ -26,3 +28,6 @@ lto = true
 codegen-units = 1
 panic = "abort"  
 strip = true 
+
+[build-dependencies]
+slint-build = "1.8.0"

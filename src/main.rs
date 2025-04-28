@@ -1,11 +1,16 @@
-#![windows_subsystem = "windows"]
+//#![windows_subsystem = "windows"]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use crate::getinfo::*;
 use crate::requests::*;
+use std::error::Error;
+use slint::SharedString;
 use tokio::time::{sleep, Duration, Instant};
 
 mod getinfo;
 mod requests;
+
+slint::include_modules!();
 
 #[tokio::main]
 async fn main() {
@@ -16,6 +21,11 @@ async fn main() {
 
     let mut last_mongodb_call = Instant::now();
     let mongodb_interval = Duration::from_secs(60*30);
+
+    spawn_audit().await.unwrap_or_else(|e| {
+        let error_msg = format!("Erro ao iniciar a interface: {:?}", e);
+        log_error(&error_msg);
+    });
     
     loop {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {
@@ -50,3 +60,39 @@ async fn main() {
     }
 }
 
+async fn spawn_audit() -> Result<(timespent: String, password: String), Box<dyn std::error::Error>> {
+    let ui = LoginPage::new()?;
+
+    let ui_weak = ui.as_weak();
+    ui.on_send_report(move |text: SharedString| {
+        let text_str = text.as_str();
+        
+        if text_str.is_empty() {
+            println!("Campo de texto vazio!");
+        } else {
+            send_to_mongo("Inativo - {}", text_str.to_string(), timespent).await.unwrap_or_else(|e| {
+                let error_msg = format!("Erro ao enviar informações: {:?}", e);
+                log_error(&error_msg);
+            });
+            if let Some(ui) = ui_weak.upgrade() {
+                ui.hide().unwrap();
+            }
+        }
+    });
+
+    let ui_weak_close = ui.as_weak();
+    ui.window().on_close_requested(move || {
+        send_to_mongo("Inativo - Se recusou a esclarecer o motivo").await.unwrap_or_else(|e| {
+            let error_msg = format!("Erro ao enviar informações: {:?}", e);
+            log_error(&error_msg);
+        });
+        if let Some(ui) = ui_weak_close.upgrade() {
+            ui.hide().unwrap();
+        }
+        slint::CloseRequestResponse::HideWindow
+    });
+
+    ui.run()?;
+
+    Ok(())
+}
