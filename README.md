@@ -15,7 +15,7 @@ I already make a "plataform", is simple, but usefull: [Link](https://github.com/
 - RAM
 - Restart Computer if it's online for more three days
 - Get all installed programs from computer
-- Get all active pages and applications, beyond time you spent on it
+- Get all active pages and applications, beyond time you spent on it. If is necessary it will ask you a justify to inactive time
 # Features to think:
 
 - Add filters and a dedicated section on the Actives page to separate inactive computers from active ones
