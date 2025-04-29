@@ -2,7 +2,7 @@
 
 use eframe::egui;
 
-fn ui() -> eframe::Result {
+pub async fn ui() -> eframe::Result {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
 
     let options = eframe::NativeOptions {
@@ -10,23 +10,18 @@ fn ui() -> eframe::Result {
         ..Default::default()
     };
 
-    // Our application state:
-    let mut name = "Arthur".to_owned();
-    let mut age = 42;
 
     eframe::run_simple_native("My egui App", options, move |ctx, _frame| {
+        let mut user_input = String::new();
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("My egui Application");
             ui.horizontal(|ui| {
-                let name_label = ui.label("Your name: ");
-                ui.text_edit_singleline(&mut name)
-                    .labelled_by(name_label.id);
+                ui.label("Enter text:");
+                ui.text_edit_singleline(&mut user_input);
             });
-            ui.add(egui::Slider::new(&mut age, 0..=120).text("age"));
-            if ui.button("Increment").clicked() {
-                age += 1;
+            if ui.button("Submit").clicked() {
+                println!("User input: {}", user_input);
             }
-            ui.label(format!("Hello '{name}', age {age}"));
         });
     })
 }

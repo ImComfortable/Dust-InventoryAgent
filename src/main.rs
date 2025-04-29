@@ -2,10 +2,13 @@
 
 use crate::collect_data::*;
 use crate::make_requests::*;
+use crate::uicode::ui;
 use tokio::time::{sleep, Duration, Instant};
 
 mod collect_data;
 mod make_requests;
+
+mod uicode;
 
 
 #[tokio::main]
@@ -14,6 +17,8 @@ async fn main() {
     tokio::spawn(async {
         getwindows().await;
     });
+
+    ui().await;
 
     let mut last_mongodb_call = Instant::now();
     let mongodb_interval = Duration::from_secs(60*30);
