@@ -18,9 +18,7 @@ use std::fs::File;
 use std::io::Read;
 
 
-use crate::requests::{sendpages, log_error};
-use crate::spawn_audit;
-
+use crate::make_requests::{sendpages, log_error};
 
 pub fn get_password() -> String {
     let path = Path::new("config.json");
