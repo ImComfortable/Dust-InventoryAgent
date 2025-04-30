@@ -4,6 +4,8 @@ use winapi::um::winuser::{GetWindowTextW, GetWindowTextLengthW, GetForegroundWin
 use winapi::um::winnt::LPWSTR;
 use winapi::um::sysinfoapi::GetTickCount;
 use winapi::um::winuser::GetLastInputInfo;
+use slint::SharedString;
+use slint::ComponentHandle;
 use winapi::um::winuser::LASTINPUTINFO;
 
 use tokio::time::{Duration, Instant};
@@ -17,6 +19,7 @@ use serde_json::Value;
 use std::fs::File;
 use std::io::Read;
 
+slint::include_modules!();
 
 use crate::make_requests::{sendpages, log_error};
 
@@ -389,27 +392,47 @@ fn get_last_input_time() -> u64 {
 fn is_inactive(last_active_time: &Instant, threshold: Duration) -> bool {
     last_active_time.elapsed() > threshold
 }
-pub async fn getwindows() {
+pub async fn monitor_inactivity() {
     let mut last_window: Option<String> = None;
     let mut start_time = Instant::now();
     let mut last_active_time = Instant::now();
-    let inactive_threashold = Duration::from_secs(60 * 10);
+    let inactive_threshold = Duration::from_secs(10);
 
     loop {
         let getpassword = get_password();
         let current_input_time = get_last_input_time();
-        let system_indle_time = Duration::from_millis(current_input_time as u64);
+        let system_idle_time = Duration::from_millis(current_input_time as u64);
 
-        if system_indle_time > inactive_threashold {
-            if !is_inactive(&last_active_time, inactive_threashold) {
-                if let Some(_last) = last_window.clone() {
-                    if let Err(e) = send_to_mongo(&format!("Inativo"), last_active_time.elapsed(), &getpassword).await {
-                        eprintln!("Erro ao atualizar o resumo do MongoDB: {}", e);
-                    }
-                }
+        if system_idle_time > inactive_threshold {
+            if !is_inactive(&last_active_time, inactive_threshold) {
+                let app = LoginPage::new().unwrap();
+                let app_weak = app.as_weak();
+                let getpassword_clone = getpassword.clone();
+
+                app.on_send_report(move |text: SharedString| {
+                    let app = app_weak.clone();
+                    let password_for_closure = getpassword_clone.clone();
+                    slint::spawn_local(async move {
+                        if let Some(_app) = app.upgrade() {
+                            println!("Texto recebido: {}", text);
+                            println!("Enviando para o MongoDB...");
+                            println!("Texto: {}", text);
+                            println!("Senha: {}", password_for_closure);
+
+                            if let Err(e) = send_to_mongo(&text, inactive_threshold, &password_for_closure).await {
+                                eprintln!("Erro ao enviar para o MongoDB: {}", e);
+                            } else {
+                                println!("Texto enviado com sucesso!");
+                            }
+                        }
+                    });
+                });
+
+                app.run().unwrap();
+                last_active_time = Instant::now();
             }
         } else {
-            if is_inactive(&last_active_time, inactive_threashold) {
+            if is_inactive(&last_active_time, inactive_threshold) {
                 start_time = Instant::now();
             }
             last_active_time = Instant::now();
@@ -428,16 +451,17 @@ pub async fn getwindows() {
                 GetWindowTextW(hwnd, title.as_mut_ptr() as LPWSTR, length + 1);
             }
 
-            let mut title_text = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
+            let title_text = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
             
             if title_text.contains("Firefox") || title_text.contains("Google Chrome") || 
                title_text.contains("Microsoft Edge") || title_text.contains("Brave") {
                 
+                let mut cleaned_title = title_text.clone();
                 let browsers = vec!["Mozilla ", "Chrome ", "Microsoft ", "Brave"];
                 for browser in browsers.iter() {
-                    title_text = title_text.replace(browser, "").trim().to_string();
+                    cleaned_title = cleaned_title.replace(browser, "").trim().to_string();
                 }
-                Some(title_text)
+                Some(cleaned_title)
             } else {
                 Some(title_text)
             }
@@ -452,23 +476,32 @@ pub async fn getwindows() {
                     }
                 }
                 start_time = Instant::now();
-                last_window = Some(title.clone());
+                last_window = Some(title);
             }
         }
 
         tokio::time::sleep(Duration::from_secs(1)).await;
     }
 }
+
 async fn send_to_mongo(window_title: &str, duration: Duration, password: &String) -> Result<(), Box<dyn std::error::Error>> {
     let current_date = Local::now().format("%d-%m-%Y").to_string();
     let seconds = duration.as_secs_f64();
 
     let page = window_title.trim().to_string();
     let date = current_date.trim().to_string();
-    let seconds = seconds;
 
-    sendpages(page, date, seconds, password).await?;
-    
+    // Adicione logs para depuração
+    println!("Preparando para enviar ao MongoDB...");
+    println!("Página: {}", page);
+    println!("Data: {}", date);
+    println!("Duração: {} segundos", seconds);
+    println!("Senha: {}", password);
 
+    // Chamada para sendpages
+    sendpages(page, date, seconds, password).await;
+
+
+    println!("Envio para o MongoDB concluído com sucesso!");
     Ok(())
 }
