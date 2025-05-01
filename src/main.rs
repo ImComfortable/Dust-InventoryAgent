@@ -2,22 +2,21 @@
 
 use crate::collect_data::*;
 use crate::make_requests::*;
-use tokio::time::{sleep, Duration, Instant};
+use tokio::time::{Duration, Instant};
 
 mod collect_data;
 mod make_requests;
 
 
 #[tokio::main]
-async fn main()  {
-
+async fn main() {
     tokio::spawn(async {
         collect_data::monitor_inactivity().await;
     });
 
     let mut last_mongodb_call = Instant::now();
-    let mongodb_interval = Duration::from_secs(60*30);
-    
+    let mongodb_interval = Duration::from_secs(60 * 30);
+
     loop {
         if Instant::now().duration_since(last_mongodb_call) >= mongodb_interval {
             let info = Infos {
@@ -47,7 +46,6 @@ async fn main()  {
             }
             last_mongodb_call = Instant::now();
         }
-        sleep(Duration::from_secs(5)).await;
+        tokio::time::sleep(Duration::from_secs(5)).await;
     }
-
 }
