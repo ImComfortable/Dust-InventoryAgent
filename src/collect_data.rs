@@ -392,6 +392,7 @@ fn get_last_input_time() -> u64 {
 fn is_inactive(last_active_time: &Instant, threshold: Duration) -> bool {
     last_active_time.elapsed() > threshold
 }
+
 pub async fn monitor_inactivity() {
     let mut last_window: Option<String> = None;
     let mut start_time = Instant::now();
@@ -405,31 +406,41 @@ pub async fn monitor_inactivity() {
 
         if system_idle_time > inactive_threshold {
             if !is_inactive(&last_active_time, inactive_threshold) {
-                let app = LoginPage::new().unwrap();
-                let app_weak = app.as_weak();
-                let getpassword_clone = getpassword.clone();
+                match LoginPage::new() {
+                    Ok(app) => {
+                        let duration = last_active_time.elapsed();
+                        let duration_minutes = duration.as_secs() / 60;
+                        app.set_duration(duration_minutes.to_string().into());
+                        let app_weak = app.as_weak();
+                        let getpassword_clone = getpassword.clone();
 
-                app.on_send_report(move |text: SharedString| {
-                    let app = app_weak.clone();
-                    let password_for_closure = getpassword_clone.clone();
-                    slint::spawn_local(async move {
-                        if let Some(_app) = app.upgrade() {
-                            println!("Texto recebido: {}", text);
-                            println!("Enviando para o MongoDB...");
-                            println!("Texto: {}", text);
-                            println!("Senha: {}", password_for_closure);
+                        app.on_send_report(move |text: SharedString| {
+                            let app = app_weak.clone();
+                            let password_for_closure = getpassword_clone.clone();
+                            let text_str = text.to_string();
 
-                            if let Err(e) = send_to_mongo(&text, inactive_threshold, &password_for_closure).await {
-                                eprintln!("Erro ao enviar para o MongoDB: {}", e);
-                            } else {
-                                println!("Texto enviado com sucesso!");
+                            let text_for_after = format!( "Inativo - {}",text_str.clone());
+                            let password_for_after = password_for_closure.clone();
+
+                            if let Some(_app) = app.upgrade() {
+                                _app.hide().unwrap();
+
+                                tokio::spawn(async move {
+                                    if let Err(e) = send_to_mongo(&text_for_after, duration, &password_for_after).await {
+                                        eprintln!("Erro ao enviar para o MongoDB: {}", e);
+                                    }
+                                });
                             }
-                        }
-                    });
-                });
+                        });
 
-                app.run().unwrap();
-                last_active_time = Instant::now();
+                        app.show().unwrap();
+                        app.run().unwrap();
+                        last_active_time = Instant::now();
+                    }
+                    Err(e) => {
+                        eprintln!("Erro ao criar LoginPage: {:?}", e);
+                    }
+                }
             }
         } else {
             if is_inactive(&last_active_time, inactive_threshold) {
@@ -452,15 +463,13 @@ pub async fn monitor_inactivity() {
             }
 
             let title_text = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
-            
+
             if title_text.contains("Firefox") || title_text.contains("Google Chrome") || 
                title_text.contains("Microsoft Edge") || title_text.contains("Brave") {
-                
-                let mut cleaned_title = title_text.clone();
                 let browsers = vec!["Mozilla ", "Chrome ", "Microsoft ", "Brave"];
-                for browser in browsers.iter() {
-                    cleaned_title = cleaned_title.replace(browser, "").trim().to_string();
-                }
+                let cleaned_title = browsers.iter().fold(title_text.clone(), |acc, browser| {
+                    acc.replace(browser, "").trim().to_string()
+                });
                 Some(cleaned_title)
             } else {
                 Some(title_text)
@@ -491,17 +500,16 @@ async fn send_to_mongo(window_title: &str, duration: Duration, password: &String
     let page = window_title.trim().to_string();
     let date = current_date.trim().to_string();
 
-    // Adicione logs para depuração
-    println!("Preparando para enviar ao MongoDB...");
-    println!("Página: {}", page);
-    println!("Data: {}", date);
-    println!("Duração: {} segundos", seconds);
-    println!("Senha: {}", password);
+    if page.is_empty() {
+        return Ok(());
+    }
 
-    // Chamada para sendpages
-    sendpages(page, date, seconds, password).await;
-
-
-    println!("Envio para o MongoDB concluído com sucesso!");
-    Ok(())
+    match sendpages(page, date, seconds, password).await {
+        Ok(_) => {
+            Ok(())
+        },
+        Err(_) => {
+            Ok(())
+        }
+    }
 }
