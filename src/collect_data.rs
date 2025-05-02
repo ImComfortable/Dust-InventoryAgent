@@ -389,15 +389,14 @@ fn get_last_input_time() -> u64 {
         0
     }
 }
-fn is_inactive(last_active_time: &Instant, threshold: Duration) -> bool {
-    last_active_time.elapsed() > threshold
-}
 
 pub async fn monitor_inactivity() {
     let mut last_window: Option<String> = None;
     let mut start_time = Instant::now();
     let mut last_active_time = Instant::now();
     let inactive_threshold = Duration::from_secs(10);
+    let mut was_inactive = false;
+    let mut inactivity_duration = Duration::from_secs(0);
 
     loop {
         let getpassword = get_password();
@@ -405,47 +404,75 @@ pub async fn monitor_inactivity() {
         let system_idle_time = Duration::from_millis(current_input_time as u64);
 
         if system_idle_time > inactive_threshold {
-            if !is_inactive(&last_active_time, inactive_threshold) {
+            if !was_inactive {
+
+                was_inactive = true;
+                last_active_time = Instant::now();
+            }
+        } else {
+            if was_inactive {
+                inactivity_duration = last_active_time.elapsed();
+                was_inactive = false;
+                
                 match LoginPage::new() {
                     Ok(app) => {
-                        let duration = last_active_time.elapsed();
-                        let duration_minutes = duration.as_secs() / 60;
+                        let duration_minutes = inactivity_duration.as_secs() / 60;
                         app.set_duration(duration_minutes.to_string().into());
                         let app_weak = app.as_weak();
-                        let getpassword_clone = getpassword.clone();
-
+                        
+                        let getpassword_for_report = getpassword.clone();
+                        let getpassword_for_close = getpassword.clone(); 
+                    
                         app.on_send_report(move |text: SharedString| {
                             let app = app_weak.clone();
-                            let password_for_closure = getpassword_clone.clone();
+                            let password_for_closure = getpassword_for_report.clone();
                             let text_str = text.to_string();
-
-                            let text_for_after = format!( "Inativo - {}",text_str.clone());
+                    
+                            let text_for_after = format!("Inativo - {}", text_str.clone());
                             let password_for_after = password_for_closure.clone();
-
+                    
                             if let Some(_app) = app.upgrade() {
                                 _app.hide().unwrap();
-
+                    
                                 tokio::spawn(async move {
-                                    if let Err(e) = send_to_mongo(&text_for_after, duration, &password_for_after).await {
-                                        eprintln!("Erro ao enviar para o MongoDB: {}", e);
+                                    if let Err(e) = send_to_mongo(&text_for_after, inactivity_duration, &password_for_after).await {
+                                        let error_msg = format!("Erro ao enviar informações para o MongoDB: {:?}", e);
+                                        log_error(&error_msg);
                                     }
                                 });
                             }
                         });
-
+                    
+                        let app_weak_close = app.as_weak();
+                        
+                        app.window().on_close_requested(move || {
+                            let password_for_closure = getpassword_for_close.clone(); 
+                            
+                            if let Some(app) = app_weak_close.upgrade() {
+                                app.hide().unwrap();
+                            }
+                            
+                            tokio::spawn(async move {
+                                if let Err(e) = send_to_mongo("Inativo - Se recusou a esclarecer o motivo", inactivity_duration, &password_for_closure).await {
+                                    let error_msg = format!("Erro ao enviar informações de inatividade sem motivo: {:?}", e);                                  
+                                    log_error(&error_msg);
+                                }          
+                            });
+                            
+                            slint::CloseRequestResponse::HideWindow
+                        });
+                    
                         app.show().unwrap();
                         app.run().unwrap();
-                        last_active_time = Instant::now();
                     }
                     Err(e) => {
                         eprintln!("Erro ao criar LoginPage: {:?}", e);
                     }
                 }
-            }
-        } else {
-            if is_inactive(&last_active_time, inactive_threshold) {
+                
                 start_time = Instant::now();
             }
+            
             last_active_time = Instant::now();
         }
 

@@ -1,6 +1,7 @@
 import { Button, VerticalBox, LineEdit, HorizontalBox, TextEdit } from "std-widgets.slint";
 
 export component LoginPage inherits Window {
+
     no-frame: false;
     resize-border-width: 10px;
     title: "Report page";
@@ -34,7 +35,7 @@ export component LoginPage inherits Window {
                 wrap: TextWrap.char-wrap;
                 x: 19px;
                 stroke-style: TextStrokeStyle.center;
-                text: "Percebemos que você ficou " + duration + " minutos fora,\nquer nos contar o que aconteceu?";
+                text: "Percebemos que você ficou " + duration + " minutos vagabundando,\nfala ai o porque.";
                 letter-spacing: 0.2px;
                 overflow: TextOverflow.elide;
                 color: #d8d8d8;
@@ -67,15 +68,25 @@ export component LoginPage inherits Window {
         }
     }
 
-    Button {
-        accessible-role: AccessibleRole.checkbox;
-        primary: true;
-        text: "Enviar";
-        x: 223px;
-        y: 294px;
-
+    TouchArea {
+        mouse-cursor: pointer;
         clicked => {
             send_report(text-input.text);
+        }
+        width: 175px;
+        height: 35px;
+        x: 159px;
+        y: 286px;
+
+        Rectangle {
+            Text {
+                text: "Enviar";
+                font-size: 15px;
+                color: #12447D; 
+                font-weight: 600;
+            }
+            background: #e6e6e6;
+            border-radius: 10px;
         }
     }
 
