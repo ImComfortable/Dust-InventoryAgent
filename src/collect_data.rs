@@ -397,6 +397,7 @@ pub async fn monitor_inactivity() {
     let inactive_threshold = Duration::from_secs(10);
     let mut was_inactive = false;
     let mut inactivity_duration = Duration::from_secs(0);
+    let mut already_shown = false; // <-- MOVIDA PARA FORA DO LOOP PRINCIPAL
 
     loop {
         let getpassword = get_password();
@@ -405,7 +406,6 @@ pub async fn monitor_inactivity() {
 
         if system_idle_time > inactive_threshold {
             if !was_inactive {
-
                 was_inactive = true;
                 last_active_time = Instant::now();
             }
@@ -413,68 +413,68 @@ pub async fn monitor_inactivity() {
             if was_inactive {
                 inactivity_duration = last_active_time.elapsed();
                 was_inactive = false;
-                
-                let app = LoginPage::new().unwrap();
-                let mut already_shown = false;
 
-                        let duration_minutes = inactivity_duration.as_secs() / 60;
-                        app.set_duration(duration_minutes.to_string().into());
-                        let app_weak = app.as_weak();
-                        
-                        let getpassword_for_report = getpassword.clone();
-                        let getpassword_for_close = getpassword.clone(); 
-                    
-                        app.on_send_report(move |text: SharedString| {
-                            let app = app_weak.clone();
-                            let password_for_closure = getpassword_for_report.clone();
-                            let text_str = text.to_string();
-                    
-                            let text_for_after = format!("Inativo - {}", text_str.clone());
-                            let password_for_after = password_for_closure.clone();
-                    
-                            if let Some(_app) = app.upgrade() {
-                                _app.hide().unwrap();
-                    
-                                tokio::spawn(async move {
-                                    if let Err(e) = send_to_mongo(&text_for_after, inactivity_duration, &password_for_after).await {
-                                        let error_msg = format!("Erro ao enviar informações para o MongoDB: {:?}", e);
-                                        log_error(&error_msg);
-                                    }
-                                });
-                            }
-                        });
-                    
-                        let app_weak_close = app.as_weak();
-                        
-                        app.window().on_close_requested(move || {
-                            let password_for_closure = getpassword_for_close.clone(); 
-                            
-                            if let Some(app) = app_weak_close.upgrade() {
-                                app.hide().unwrap();
-                            }
-                            
+                // Só mostra a janela se ainda não foi mostrada
+                if !already_shown {
+                    let app = LoginPage::new().unwrap();
+
+                    let duration_minutes = inactivity_duration.as_secs() / 60;
+                    app.set_duration(duration_minutes.to_string().into());
+                    let app_weak = app.as_weak();
+
+                    let getpassword_for_report = getpassword.clone();
+                    let getpassword_for_close = getpassword.clone();
+
+                    app.on_send_report(move |text: SharedString| {
+                        let app = app_weak.clone();
+                        let password_for_closure = getpassword_for_report.clone();
+                        let text_str = text.to_string();
+
+                        let text_for_after = format!("Inativo - {}", text_str.clone());
+                        let password_for_after = password_for_closure.clone();
+
+                        if let Some(_app) = app.upgrade() {
+                            _app.hide().unwrap();
+
                             tokio::spawn(async move {
-                                if let Err(e) = send_to_mongo("Inativo - Se recusou a esclarecer o motivo", inactivity_duration, &password_for_closure).await {
-                                    let error_msg = format!("Erro ao enviar informações de inatividade sem motivo: {:?}", e);                                  
+                                if let Err(e) = send_to_mongo(&text_for_after, inactivity_duration, &password_for_after).await {
+                                    let error_msg = format!("Erro ao enviar informações para o MongoDB: {:?}", e);
                                     log_error(&error_msg);
-                                }          
+                                }
                             });
-                            
-                            slint::CloseRequestResponse::HideWindow
+                        }
+                    });
+
+                    let app_weak_close = app.as_weak();
+
+                    app.window().on_close_requested(move || {
+                        let password_for_closure = getpassword_for_close.clone();
+
+                        if let Some(app) = app_weak_close.upgrade() {
+                            app.hide().unwrap();
+                        }
+
+                        tokio::spawn(async move {
+                            if let Err(e) = send_to_mongo("Inativo - Se recusou a esclarecer o motivo", inactivity_duration, &password_for_closure).await {
+                                let error_msg = format!("Erro ao enviar informações de inatividade sem motivo: {:?}", e);
+                                log_error(&error_msg);
+                            }
                         });
-                    
-                        app.show().unwrap();
-                
+
+                        slint::CloseRequestResponse::HideWindow
+                    });
+
+                    app.show().unwrap();
+                    app.run();
+                    already_shown = true; // <-- ATUALIZAÇÃO DA VARIÁVEL GLOBAL
+                }
+
                 start_time = Instant::now();
-                
-                if already_shown == false {
-                   app.run();
-                    }
-                already_shown = true;
             }
-            
+
             last_active_time = Instant::now();
         }
+
 
         let current_title = tokio::task::spawn_blocking(|| {
             let hwnd = unsafe { GetForegroundWindow() };
