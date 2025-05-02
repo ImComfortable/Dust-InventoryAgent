@@ -414,8 +414,9 @@ pub async fn monitor_inactivity() {
                 inactivity_duration = last_active_time.elapsed();
                 was_inactive = false;
                 
-                match LoginPage::new() {
-                    Ok(app) => {
+                let app = LoginPage::new().unwrap();
+                let mut already_shown = false;
+
                         let duration_minutes = inactivity_duration.as_secs() / 60;
                         app.set_duration(duration_minutes.to_string().into());
                         let app_weak = app.as_weak();
@@ -463,14 +464,13 @@ pub async fn monitor_inactivity() {
                         });
                     
                         app.show().unwrap();
-                        app.run().unwrap();
-                    }
-                    Err(e) => {
-                        eprintln!("Erro ao criar LoginPage: {:?}", e);
-                    }
-                }
                 
                 start_time = Instant::now();
+                
+                if already_shown == false {
+                   app.run();
+                    }
+                already_shown = true;
             }
             
             last_active_time = Instant::now();
