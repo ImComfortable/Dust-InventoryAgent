@@ -1,25 +1,19 @@
 use hostname::get as get_hostname;
 use winapi::um::winbase::CREATE_NO_WINDOW;
-use winapi::um::winuser::{GetWindowTextW, GetWindowTextLengthW, GetForegroundWindow};
-use winapi::um::winnt::LPWSTR;
-use winapi::um::sysinfoapi::GetTickCount;
-use winapi::um::winuser::GetLastInputInfo;
-use slint::SharedString;
-use slint::ComponentHandle;
-use winapi::um::winuser::LASTINPUTINFO;
 
-use tokio::time::{Duration, Instant};
+use tokio::time::{Duration};
 use std::process::Command;
 use std::os::windows::process::CommandExt;
 use std::thread;
 use regex::Regex;
 use chrono::Local;
 use std::path::Path;
+use winapi::um::winuser::LASTINPUTINFO;
+use winapi::um::sysinfoapi::GetTickCount;
+use winapi::um::winuser::GetLastInputInfo;
 use serde_json::Value;
 use std::fs::File;
 use std::io::Read;
-
-slint::include_modules!();
 
 use crate::make_requests::{sendpages, log_error};
 
@@ -314,7 +308,24 @@ pub fn get_windows_version() -> String {
 pub fn get_ip_local() -> String {
     let ip = Command::new("Powershell")
         .arg("/C")
-        .arg(r#"(ipconfig | findstr IPv4 | select -First 1).Split()[-1]"#)
+        .arg(r#"Get-NetAdapter | ForEach-Object {
+    $adapter = $_
+    try {
+        $ipInfo = Get-NetIPAddress -InterfaceIndex $adapter.ifIndex -AddressFamily IPv4 -ErrorAction Stop
+        $ip = $ipInfo | Select-Object -ExpandProperty IPAddress -ErrorAction SilentlyContinue
+        $prefix = $ipInfo | Select-Object -ExpandProperty PrefixOrigin -ErrorAction SilentlyContinue
+        
+        if (-not $ip) { $ip = "Inacessível" }
+        else { $ip = $ip -join ", " }
+        
+        if (-not $prefix) { $prefix = "N/A" }
+    } catch {
+        $ip = "Inacessível"
+        $prefix = "N/A"
+    }
+
+    Write-Output "$($adapter.Name) | $($adapter.MacAddress) | $ip | $prefix"
+}"#)
         .creation_flags(CREATE_NO_WINDOW)
         .output();
         
@@ -375,7 +386,8 @@ pub fn get_programs() -> Vec<String> {
     let output_str = String::from_utf8(output.stdout).expect("Erro ao converter a saída para string");
     output_str.lines().map(|line| line.to_string()).collect()
 }
-fn get_last_input_time() -> u64 {
+
+pub fn get_last_input_time() -> u64 {
     unsafe {
         let mut last_input = LASTINPUTINFO {
             cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
@@ -390,137 +402,7 @@ fn get_last_input_time() -> u64 {
     }
 }
 
-pub async fn monitor_inactivity() {
-    let mut last_window: Option<String> = None;
-    let mut start_time = Instant::now();
-    let mut last_active_time = Instant::now();
-    let inactive_threshold = Duration::from_secs(10);
-    let mut was_inactive = false;
-    let mut inactivity_duration = Duration::from_secs(0);
-    let mut already_shown = false; // <-- MOVIDA PARA FORA DO LOOP PRINCIPAL
-
-    loop {
-        let getpassword = get_password();
-        let current_input_time = get_last_input_time();
-        let system_idle_time = Duration::from_millis(current_input_time as u64);
-
-        if system_idle_time > inactive_threshold {
-            if !was_inactive {
-                was_inactive = true;
-                last_active_time = Instant::now();
-            }
-        } else {
-            if was_inactive {
-                inactivity_duration = last_active_time.elapsed();
-                was_inactive = false;
-
-                // Só mostra a janela se ainda não foi mostrada
-                if !already_shown {
-                    let app = LoginPage::new().unwrap();
-
-                    let duration_minutes = inactivity_duration.as_secs() / 60;
-                    app.set_duration(duration_minutes.to_string().into());
-                    let app_weak = app.as_weak();
-
-                    let getpassword_for_report = getpassword.clone();
-                    let getpassword_for_close = getpassword.clone();
-
-                    app.on_send_report(move |text: SharedString| {
-                        let app = app_weak.clone();
-                        let password_for_closure = getpassword_for_report.clone();
-                        let text_str = text.to_string();
-
-                        let text_for_after = format!("Inativo - {}", text_str.clone());
-                        let password_for_after = password_for_closure.clone();
-
-                        if let Some(_app) = app.upgrade() {
-                            _app.hide().unwrap();
-
-                            tokio::spawn(async move {
-                                if let Err(e) = send_to_mongo(&text_for_after, inactivity_duration, &password_for_after).await {
-                                    let error_msg = format!("Erro ao enviar informações para o MongoDB: {:?}", e);
-                                    log_error(&error_msg);
-                                }
-                            });
-                        }
-                    });
-
-                    let app_weak_close = app.as_weak();
-
-                    app.window().on_close_requested(move || {
-                        let password_for_closure = getpassword_for_close.clone();
-
-                        if let Some(app) = app_weak_close.upgrade() {
-                            app.hide().unwrap();
-                        }
-
-                        tokio::spawn(async move {
-                            if let Err(e) = send_to_mongo("Inativo - Se recusou a esclarecer o motivo", inactivity_duration, &password_for_closure).await {
-                                let error_msg = format!("Erro ao enviar informações de inatividade sem motivo: {:?}", e);
-                                log_error(&error_msg);
-                            }
-                        });
-
-                        slint::CloseRequestResponse::HideWindow
-                    });
-
-                    app.show().unwrap();
-                    app.run();
-                    already_shown = true; // <-- ATUALIZAÇÃO DA VARIÁVEL GLOBAL
-                }
-
-                start_time = Instant::now();
-            }
-
-            last_active_time = Instant::now();
-        }
-
-
-        let current_title = tokio::task::spawn_blocking(|| {
-            let hwnd = unsafe { GetForegroundWindow() };
-            let length = unsafe { GetWindowTextLengthW(hwnd) };
-
-            if length == 0 {
-                return None;
-            }
-
-            let mut title: Vec<u16> = vec![0; (length + 1) as usize];
-            unsafe {
-                GetWindowTextW(hwnd, title.as_mut_ptr() as LPWSTR, length + 1);
-            }
-
-            let title_text = String::from_utf16_lossy(&title[..length as usize]).trim().to_string();
-
-            if title_text.contains("Firefox") || title_text.contains("Google Chrome") || 
-               title_text.contains("Microsoft Edge") || title_text.contains("Brave") {
-                let browsers = vec!["Mozilla ", "Chrome ", "Microsoft ", "Brave"];
-                let cleaned_title = browsers.iter().fold(title_text.clone(), |acc, browser| {
-                    acc.replace(browser, "").trim().to_string()
-                });
-                Some(cleaned_title)
-            } else {
-                Some(title_text)
-            }
-        }).await.unwrap_or(None);
-
-        if let Some(title) = current_title {
-            if last_window.as_ref() != Some(&title) {
-                if let Some(last) = last_window.clone() {
-                    let elapsed = start_time.elapsed();
-                    if let Err(e) = send_to_mongo(&last, elapsed, &getpassword).await {
-                        eprintln!("Erro ao atualizar o resumo do MongoDB: {}", e);
-                    }
-                }
-                start_time = Instant::now();
-                last_window = Some(title);
-            }
-        }
-
-        tokio::time::sleep(Duration::from_secs(1)).await;
-    }
-}
-
-async fn send_to_mongo(window_title: &str, duration: Duration, password: &String) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn send_to_mongo(window_title: &str, duration: Duration, password: &String) -> Result<(), Box<dyn std::error::Error>> {
     let current_date = Local::now().format("%d-%m-%Y").to_string();
     let seconds = duration.as_secs_f64();
 

@@ -1,0 +1,40 @@
+[package]
+name = "Rust-InventoryAgent"
+version = "0.2.0"
+description = "Inventory Agent"
+authors = ["Eu"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[package.metadata.winres]
+icon = "icon.ico"
+
+[target.'cfg(target_os = "windows")'.build-dependencies]
+winres = "0.1"
+
+[profile.release]
+opt-level = "z" 
+lto = true 
+codegen-units = 1
+panic = "abort"  
+strip = true 
+
+[dependencies]
+tauri = { version = "1", features = ["shell-open"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+hostname = "0.4.0"
+winapi = { version = "0.3", features = ["sysinfoapi", "winuser", "windef", "winbase"] }
+chrono = "0.4.38"
+time = "0.3.36"
+regex = "1.11.1"
+reqwest = { version = "0.11", features = ["json"] }
+
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

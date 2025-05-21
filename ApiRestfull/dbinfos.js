@@ -1,5 +1,4 @@
 import pkg from 'joi';
-const { date } = pkg;
 import { Schema, model} from 'mongoose';
 
 const infoschema = new Schema({
@@ -118,10 +117,24 @@ const UserSchema = new Schema({
     ],
   }); 
 
+const DepartSchema = new Schema({
+    setor: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    time: {
+        type: Number,
+        required: true,
+    }
+});
+
 const Infos = model("infos", infoschema);
 const User = model("user", UserSchema);
+const Depart = model("Depart", DepartSchema);
 
 export default {
     Infos,
-    User
+    User,
+    Depart,
 }

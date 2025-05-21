@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.tauri.app/config/1",
+  "build": {
+    "devPath": "../src",
+    "distDir": "../src",
+    "withGlobalTauri": true
+  },
+  "package": {
+    "productName": "testeai",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      },
+      "dialog": {
+        "message": true
+      },
+      "window": {
+        "hide": true
+      }
+    },
+    "windows": [
+      {
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "asd",
+      "icon": [
+        "icon.ico"
+      ]
+    }
+  }
+}

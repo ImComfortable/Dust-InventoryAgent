@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inatividade Detectada</title>
+  <style>
+    :root {
+      --primary: #5b73e8;
+      --text: #2c2c2c;
+      --background: #f9f9f9;
+      --border: #e6e6e6;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 360px;
+      padding: 1.25rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .header__title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--text);
+    }
+
+    .header__subtitle {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .header_warning {
+      color: #ac5252;
+      font-size: 0.60rem;
+      font-weight: 600;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .option-btn {
+      background-color: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .option-btn:hover {
+      background-color: rgba(91, 115, 232, 0.05);
+      border-color: var(--primary);
+      transform: scale(1.03);
+    }
+
+    .option-btn:active {
+      background-color: rgba(91, 115, 232, 0.1);
+    }
+
+    .divider {
+      margin: 1rem 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .divider:before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: var(--border);
+    }
+
+    .divider span {
+      position: relative;
+      background-color: var(--background);
+      padding: 0 0.75rem;
+      color: #888;
+      font-size: 0.75rem;
+    }
+
+    .input-group {
+      margin: 0.100rem;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.8rem;
+      color: #888;
+      margin-left: 5px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background-color: white;
+      font-size: 0.85rem;
+      resize: none;
+      height: 80px;
+      transition: border 0.2s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.20rem 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      background-color: #4a63d3;
+      transform: scale(1.05);
+    }
+
+    .submit-btn:active {
+      background-color: #3f56c7;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #e4e4e4;
+        --background: #1e1e1e;
+        --border: #333;
+      }
+
+      .option-btn {
+        background-color: #252525;
+      }
+
+      textarea {
+        background-color: #252525;
+        color: var(--text);
+      }
+
+      .divider span {
+        background-color: var(--background);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header class="header">
+      <h1 class="header__title">Opa, pausa detectada!</h1>
+      <p class="header__subtitle">Percebemos que você ficou um tempinho afastado do computador. Quer nos contar o por quê?</p>
+      <h3 class="header_warning">Lembrando que caso você não responda em 5 minutinhos, a janela será fechada e uma resposta generíca será enviada!</h3>
+    </header>
+
+    <form id="inactivity-form">
+      <div class="options">
+        <button type="button" class="option-btn">Questões de Saúde</button>
+        <button type="button" class="option-btn">Atividades Corporativas</button>
+        <button type="button" class="option-btn">Compromissos Pessoais</button>
+        <button type="button" class="option-btn">Refeição</button>
+        <button type="button" class="option-btn">Necessidades Basicas</button>
+      </div>
+
+      <div class="divider">
+        <span>ou</span>
+      </div>
+
+      <div class="input-group">
+        <label for="custom-reason">Caso nenhum se encaixe no que aconteceu, nos diga outro motivo:</label>
+        <textarea id="custom-reason" placeholder="Descreva brevemente..."></textarea>
+      <button type="submit" class="submit-btn">Enviar</button>
+    </form>
+  </main>
+</body>
+</html>
+<script src="main.js"></script>

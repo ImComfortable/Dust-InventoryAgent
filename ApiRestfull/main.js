@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import search from './configAD.js';
 import db from './dbinfos.js';
 import buscarSetorLDAP from './configAD.js';
-const { Infos, User } = db;
+const { Infos, User, Depart } = db;
 
 dotenv.config();
 
@@ -85,6 +85,73 @@ const processarListaProgramas = (programs) => {
   return listaAplicativos;
 };
 
+app.post('/checkdepartament', verifyRequest, async (req, res) => {
+  const data = Array.isArray(req.body) ? req.body : [req.body];
+  const responses = [];
+
+  for (const item of data) {
+    try {
+      const { username, apiauth } = item;
+
+      if (!apiauth || !username) {
+        responses.push({ status: 400, message: 'Autenticação obrigatória' });
+        continue;
+      }
+
+      let setor;
+
+      if (username.includes(".")) {
+        setor = (await search(username)).toLowerCase();
+      } else if (username.includes("term")) {
+        setor = username.replace(/term/gi, "").trim();
+      } else {
+        setor = username.toUpperCase();
+      }
+
+      let exist = await Depart.findOne({ setor: setor });
+
+      if (exist) {
+        console.log("debug");
+        let inactivity_threshold = await Depart.findOne(
+          { setor: setor },
+          { time: 1, _id: 0 }
+        );
+
+        console.log("debug", inactivity_threshold);
+
+        responses.push({
+          status: 200,
+          time: inactivity_threshold?.time || 60 
+        });
+      } else {
+        responses.push({
+          status: 404,
+          message: 'Setor não encontrado',
+          time: 60
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao processar item:", err);
+      responses.push({ 
+        status: 500, 
+        message: "Erro interno ao processar este item",
+        time: 60
+      });
+    }
+  }
+
+  if (data.length === 1) {
+    const response = responses[0];
+    if (response.status !== 200) {
+      return res.status(response.status).json(response);
+    }
+    return res.status(200).send(response.time.toString());
+  } else {
+    return res.status(200).json(responses);
+  }
+});
+
+
 app.post('/dbinfos', verifyRequest, async (req, res) => {
   const data = Array.isArray(req.body) ? req.body : [req.body];
   const responses = [];
@@ -113,8 +180,8 @@ app.post('/dbinfos', verifyRequest, async (req, res) => {
         if(usuario) {
           if(usuario.includes(".")) {
             setor = await search(usuario);
-          } else if (usuario.includes("candeias")) {
-            setor = usuario.replace(/candeias/gi, "".trim());
+          } else if (usuario.includes("term")) {
+            setor = usuario.replace(/term/gi, "".trim());
           } else {
             setor = usuario.toUpperCase();
           }

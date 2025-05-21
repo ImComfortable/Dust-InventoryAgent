@@ -5,6 +5,7 @@ use std::fs::{File, OpenOptions};
 use std::error::Error;
 use std::fmt;
 use std::env;
+use crate::get_password;
 
 #[derive(Debug)]
 pub struct ApiError {
@@ -48,6 +49,12 @@ struct Payload<'a> {
     apiauth: &'a String,
 }
 
+#[derive(Serialize, Debug)]
+struct DepartStruct {
+    username: String,
+    apiauth: String,
+}
+
 pub async fn sendinfos(info: Infos) -> Result<(), Box<dyn Error>> {
     let client = reqwest::Client::new();
 
@@ -80,6 +87,45 @@ pub async fn sendpages(page: String, date: String, seconds: f64, password: &Stri
             let error_msg = format!("Erro ao enviar informações de página: {:?}", e);
             log_error(&error_msg);
             Ok(())
+        }
+    }
+}
+
+pub async fn get_depart_time() -> u64 {
+    let client = reqwest::Client::new();
+
+    let username = get_username();
+    let apiauth = get_password();
+
+    let structt = DepartStruct { username, apiauth };
+
+    let resp = client
+        .post("http://localhost:3000/checkdepartament")
+        .json(&structt)
+        .send()
+        .await;
+
+    match resp {
+        Ok(response) => {
+            match response.text().await {
+                Ok(body) => {
+                    match body.trim().parse::<u64>() {
+                        Ok(value) => value,
+                        Err(_) => {
+                            eprintln!("Erro ao converter a resposta em i32");
+                            0
+                        }
+                    }
+                }
+                Err(_) => {
+                    eprintln!("Erro ao ler o corpo da resposta");
+                    0
+                }
+            }
+        }
+        Err(_) => {
+            eprintln!("Erro na requisição");
+            0
         }
     }
 }
