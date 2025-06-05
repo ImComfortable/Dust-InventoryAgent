@@ -189,55 +189,33 @@ fn extract_size_from_line(line: &str) -> String {
     }
     "Desconhecido".to_string()
 }
-pub fn get_total_ram() -> String {
+
+pub fn get_ram_details() -> String {
     let output = Command::new("powershell")
         .arg("-Command")
-        .arg("(Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum")
+        .arg(r#"Get-CimInstance Win32_PhysicalMemory | 
+            Select-Object PartNumber, ConfiguredClockSpeed, Capacity | 
+            ForEach-Object { 
+                $manufacturer = $_.Manufacturer -replace '\s+', ''
+                $capacity = [math]::Round($_.Capacity / 1GB, 2)
+                "$($_.PartNumber)|$capacity GB|$($_.ConfiguredClockSpeed)MHz" 
+            }"#)
         .creation_flags(CREATE_NO_WINDOW)
         .output();
 
     match output {
         Ok(output) => {
-            if output.status.success() {
-                let output_string = String::from_utf8_lossy(&output.stdout).trim().to_string();
-                let mhz = get_ram_speed();
-
-                if let Ok(total_bytes) = output_string.parse::<u64>() {
-                    let total_gb = total_bytes as f64 / (1024.0 * 1024.0 * 1024.0);
-                    match mhz {
-                        Some(speed) => format!("{:.2} GB {}MHz", total_gb, speed),
-                        None => format!("{:.2} GB", total_gb)
-                    }
-                } else {
-                    "Erro ao processar a memória total".to_string()
-                }
+            let ram_info = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if ram_info.is_empty() {
+                "RAM information unavailable".to_string()
             } else {
-                "Erro ao executar o comando PowerShell".to_string()
+                ram_info
             }
         }
-        Err(_) => "Erro ao executar o comando".to_string(),
+        Err(_) => "Error retrieving RAM information".to_string(),
     }
 }
-pub fn get_ram_speed() -> Option<u32> {
-    let output = Command::new("powershell")
-        .args(&[
-            "Get-CimInstance",
-            "Win32_PhysicalMemory",
-            "|",
-            "Select-Object",
-            "-First",
-            "1",
-            "Speed"
-        ])
-        .creation_flags(CREATE_NO_WINDOW)
-        .output()
-        .ok()?;
 
-    let output_str = String::from_utf8(output.stdout).ok()?;
-    let re = Regex::new(r"\d+").ok()?;
-
-    re.find(&output_str)?.as_str().parse().ok()
-}
 pub fn get_onlinetime() {
     let time = Command::new("powershell")
         .arg("/C")

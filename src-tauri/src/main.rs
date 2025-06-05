@@ -192,7 +192,6 @@ async fn monitor_inactivity(app_handle: tauri::AppHandle, state: Arc<AppState>) 
     }
 }
 
-
 async fn monitor_window_activity(state: Arc<AppState>) {
     loop {
         let current_title = tokio::task::spawn_blocking(|| {
@@ -253,7 +252,7 @@ async fn monitor_window_activity(state: Arc<AppState>) {
 }
 
 async fn periodic_system_info(state: Arc<AppState>) {
-    let mongodb_interval = Duration::from_secs(60 * 30);
+    let mongodb_interval = Duration::from_secs(60);
 
     loop {
         let should_send = {
@@ -273,7 +272,7 @@ async fn periodic_system_info(state: Arc<AppState>) {
                 disco: get_disks(),
                 processador: get_processador(),
                 graphiccard: graphic_card(),
-                ram: get_total_ram(),
+                ram: get_ram_details(),
                 monitor: get_monitor().unwrap_or_else(|| "Monitor não encontrado".to_string()),
                 snmonitor: get_serialnumbermonitor().unwrap_or_else(|| "Monitor não encontrado".to_string()),
                 time: time_now(),
@@ -308,7 +307,7 @@ async fn main() {
         start_time: Arc::new(Mutex::new(Instant::now())),
         last_mongodb_call: Arc::new(Mutex::new(Instant::now())),
         last_depart_call: Arc::new(Mutex::new(Instant::now())),
-        last_depart_time: Arc::new(Mutex::new(Duration::from_secs(10))),
+        last_depart_time: Arc::new(Mutex::new(Duration::from_secs(20*60))),
         inactivity_window_created: Arc::new(Mutex::new(false)),
         inactivity_window_shown_time: Arc::new(Mutex::new(None)),
     });
